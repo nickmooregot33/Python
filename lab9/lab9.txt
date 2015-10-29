@@ -1,0 +1,19 @@
+njmoore3
+1. fluid.py:P_ig
+2. fluid.py:P_vdw
+3. fluid.py:P_rk
+4. fluid.py:getData
+5. figure_5.png
+6. 0.00968501131856
+7. 0.091956
+8. figure_8.png
+9. 0.007591
+10. figure_10.png
+11. 0.758259
+12. 3093132.083958
+13. 2483769.973384
+14. 2354692.889691
+15. figure_15.png
+16. figure_16.png
+17. 7.431955
+18. 36.530672
