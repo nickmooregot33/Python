@@ -1,0 +1,12 @@
+<your netid>
+1. figure_1.png
+2. quake.py:rolling_mean
+3. quake.py:test_rolling_mean
+4. quake.py:rolling_std
+5. quake.py:test_rolling_std
+6. figure_6.png
+7. 
+8. figure_8.png
+9. 
+10. quake.py:quake
+11. quake.py:test_quake
