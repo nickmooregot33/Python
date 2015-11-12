@@ -1,4 +1,4 @@
-<your netid>
+njmoore3
 1. figure_1.png
 2. quake.py:rolling_mean
 3. quake.py:test_rolling_mean
