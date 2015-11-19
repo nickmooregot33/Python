@@ -1,9 +1,9 @@
-<your netid>
-1. 
-2. 
+njmoore3
+1. poly([1. 0. 0. 0. 0. 5.])
+2. 9227.40625
 3. figure_3.png
 4. figure_4.png
-5. 
+5. 0.00011308145175978427
 6. spring.py:fit_spring_data
-7. 
-8. 
+7. brass, 1.4e-5,0.50
+8. 0.000138470380

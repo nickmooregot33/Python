@@ -3,4 +3,11 @@ Compose a function `fit_spring_data` which accepts as a parameter a filename `da
 """
 
 def fit_spring_data(datafile):
-    pass
+    import numpy as np
+    import numpy.polynomial.polynomial as pf
+    data = np.loadtxt(datafile)
+    x = data[0]
+    y = data[1]
+    fit = pf.polyfit(x,y,1)
+    return abs(fit[1])
+
