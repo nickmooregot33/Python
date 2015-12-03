@@ -1,5 +1,5 @@
-<your netid>
-1. 
+njmoore3
+1. 255 % was returned by  max(max(zebra)) 
 2. figure_2.png
 3. figure_3.png
 4. rgb2lab.m
