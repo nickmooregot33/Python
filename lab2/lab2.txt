@@ -1,0 +1,52 @@
+njmoore3
+1. "George Orwell's novel 1984"
+2. 'This is a straight double quote,", while these are curly double quotes: ",".'
+3. 'She then turned and asked the librarian, "Do you have a copy of Diderot\'s and d\'Alembert\'s Encyclopedie?"'
+4. 5
+5. 25
+6. 1
+7. 3125
+8. 1
+9. -7
+10. -0.14285714285714285
+11. -28
+12. -14
+13. (7-1j)
+14. - is an operator, which means that the expression user-name is evaluated as an expression where we subtract $name from $user (bash syntax for the value in a variable is used with the ${variable name}).  We can't assign the right side expression to the value of the left side expression, since that is a specific value.  
+15. 7.389056096435021
+16. 0.1
+17. 0.01
+18. capricornone
+19. capricorn one
+20. capricorncapricorncapricorncapricorn
+21. capricorn onecapricorn onecapricorn one
+22. ZeroDivisionError: integer division or modulo by zero
+23. False
+24. True
+25. True
+26. True
+27. False
+28. charge = 3
+29. charge = 1
+30. charge = -1
+31. charge = -1
+32. charge = -1
+33. yes
+34. yes
+35. no
+36. no
+37. yes
+38. 27
+39. 1.558139534883721
+40. 5440.0
+41. 0.3619047619047619
+42. x = (-b + (b**2 - 4*a*c)**0.5)/(2*a)
+43. 15 meters squared
+44. 7 meters squared
+45. 7.5 meters squared
+46. height = 2.0 * area / base
+47. (-1+1.2246467991473532e-16j)
+48. 60 minutes
+49. Questions 28 through 32 were unclear what I was supposed to write, since python does not output anything for assignment statements
+50. I didn't need anything.
+

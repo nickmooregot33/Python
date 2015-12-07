@@ -1,0 +1,69 @@
+njmoore3
+1. hello cs 101
+2. schang13@illinois.edu
+3. 1
+4. -7
+5. 4
+6. 9
+7. 4.5
+8. 3.1415
+9. -0.0001
+10. 1.0
+11. 100000.0
+12. 1564000000000000.0
+13. 0.000154643
+14. 2
+15. 100001
+16. 6.0
+17. -4442
+18. 0.02040816326530612
+19. 27
+20. 2
+21. -3
+22. 5.333333333333333
+23. (5,1) This function performs the division of the first argument by the second argument.  It returns a tuple with 2 elements.  The first argument is the integer division result, and the second element is the remainder of the integer division operation.
+24. 82
+25. 152
+26. 10
+27. 7.25
+28. 8
+29. 21
+30. 25
+31. 15
+32. -125
+33. 60
+34. 16
+35. 7
+36. 15 1
+37. hello world
+38. Use exit() or Ctrl-D (i.e. EOF) to exit
+39. absolute value of the argument
+	5
+40. Return the octal representation of an integer or long integer.
+41. With two or more arguments, return the smallest argument.
+42. Return the hyperbolic tangent of x.
+43. T.__new__(S, ...) -> a new object with type S, a subtype of T
+44. >>> help(*)
+	File "<stdin>", line 1
+		help(*)
+              ^
+	SyntaxError: invalid syntax
+45. the least integral float >= x
+46. Return the ceiling of x as a float, the smallest integer value greater than or equal to x.
+47. The mathematical constant π = 3.141592..., to available precision.
+48. 3.14159265359
+49. The search found 2 pages matching the search query
+50. The pass statement does nothing.
+51. python -m pip install SomePackage
+52. Python’s interactive interpreter enables students to test language features while they’re programming. They can keep a window with the interpreter running while they enter their program’s source in another window. If they can’t remember the methods for a list, they can do something like this:
+53. Capurnicus
+54. Anaphory
+55. os.path.exists
+56. What is a metaclass in Python?
+57. Variable Trial Conditions in PsychoPy
+58. Introspection on a python decorated method
+59. ['and', 'as', 'assert', 'break', 'class', 'continue', 'def', 'del', 'elif', 'else', 'except', 'exec', 'finally', 'for', 'from', 'global', 'if', 'import', 'in', 'is', 'lambda', 'not', 'or', 'pass', 'print', 'raise', 'return', 'try', 'while', 'with', 'yield']
+60. "Definition of academic integrity
+61. This took me about 50 minutes
+62. I didn't find any actual questions unclear, although question 51 needed a quick search in the sidebar of the page, as clicking on the link about installing modules gave us a different version of the page which did not have any version of "Basic Usage"
+63. I asked the person next to me if he knew how to answer 51 and he told me to do a quick search in the sidebar instead of using firefox's search. I later relayed that information on to someone two seats in the opposite direction.   

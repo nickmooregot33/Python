@@ -1,0 +1,13 @@
+njmoore3
+1. permute.py
+2. WARNING:	Unknown error
+3. my_func.py 
+4. r < x and x <=d
+5. True
+6. False
+7. 'Rudyard in If'
+8. '.dat' in filename
+9. polygon.py
+10. symbols.py
+11. 60
+12.	No references or consultations

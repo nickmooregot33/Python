@@ -1,0 +1,38 @@
+njmoore3
+1. <type 'int'>
+2. <type 'float'>
+3. inf
+4. 'y'
+5. IndexError: string index out of range
+6. '.'
+7. 'Sphin'
+8. ' of bla'
+9. ''
+10. 'Sphinx of black quartz: judge my vow.'
+11. 'x of black quartz: judge my vow.'
+12. 'Sphinx of '
+13. 'Sphinx of black quartz: judge my vow.'
+14. y = 1.875000 x + 4.000000
+15. from math import log10
+16. 'Mr.-Jock,-TV-quiz-PhD,-bags-few-lynx.--'
+17. 'Mr.-Jock,-TV-quiz-PhD,-bags-few-lynx.'
+18. 139 characters
+19. 4 times
+20. 25 times
+21. 31 times
+22. ['"Sometimes', 'I', 'wonder', 'whether', 'the', 'world', 'is', 'being', 'run', 'by', 'smart', 'people', 'who', 'are', 'putting', 'us', 'on,', 'or', 'by', 'imbeciles', 'who', 'really', 'mean', 'it."', '(Mark', 'Twain)']
+23. ['Mr. Jock', ' TV quiz PhD', ' bags few lynx.  ']
+24. 0.6649966577360363
+25. 2.949342341572187e-05
+26. 1.0
+27. 79534.0
+28. 0.7849395509499136
+29. 76125.0
+30. 51000.0
+31. 8
+32. 10
+33. 100
+34. 90 minutes
+35. Didn't need to go to any resources
+
+ 
