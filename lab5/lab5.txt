@@ -1,0 +1,8 @@
+njmoore3
+1. [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+2. e,f,s,v,x
+3. count_letters.py
+4. symbols_io.py 
+5. dataproc.py
+6. 90 minutes
+7. python2 documentation for string.count() and stack overflow to make sure the only reason for certain compile errors were mixing tabs and spaces.  

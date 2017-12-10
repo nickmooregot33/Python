@@ -1,0 +1,9 @@
+<your netid>
+0. <your partner's netid>
+1. figure_1.png
+2. 
+3. sail.py:loop
+4. figure_4.png
+5. moon.py:loop
+6. 3bp.py:loop
+7. figure_7.png

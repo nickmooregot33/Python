@@ -1,0 +1,17 @@
+njmoore3
+1. I didn't have a partner
+2. frequency.py:loadFreq
+3. frequency.py:loadLanguages
+4. frequency.py:calcFreq
+5. frequency.py:calcMatch
+6. afrikaans, 0.209964082687
+7. finnish, 0.589316020672
+8. english, 0.198151072125
+9. finnish, 0.545841520468
+5 10. afrikaans, 0.155079220779
+11. welsh, 0.577759307359
+12. french, 0.277558646617
+13. polish, 0.560746616541
+14. french, 0.16285374868
+15. welsh, 0.653765153115
+16. done
