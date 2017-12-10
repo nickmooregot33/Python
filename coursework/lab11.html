@@ -1,0 +1,226 @@
+<!doctype html>
+<html>
+<head>
+
+<meta charset="utf-8" />
+<title>CS 101—Lab 11</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="./css/style.css">
+
+<!-- Loading mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+    <style>
+      #math_center { text-align:center; width:100%; background-color:yellow; }
+    </style>
+</head>
+<body>
+<div class="container" id="notebook-container">
+<h1 id="earthquake-detection-simulation">Earthquake Detection &amp; Simulation</h1>
+<h2 id="seismograms">Seismograms</h2>
+<p>A seismometer measures the motion of the ground, particularly seismic waves which may originate from earthquakes or volcanic eruptions. Data often include both the magnitude and the direction of motion, although in our lab today we will only consider magnitude data for simplicity. The resulting data may be recorded in the form of a <em>seismogram</em>, which reflects the simple motion of a needle against a roll of paper.</p>
+<div class="figure">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Kinemetrics_seismograph.jpg/800px-Kinemetrics_seismograph.jpg" alt="" />
+
+</div>
+<div class="figure">
+<img src="https://tc1seismometer.files.wordpress.com/2012/07/20120204_200532_bsuz_psn.gif?w=2000&amp;h=" alt="" />
+
+</div>
+<p>We will use a generated data set using random numbers for this lab, using a technique you will follow in the last section of today's lab.</p>
+<ol start="0" style="list-style-type: decimal">
+<li><p>(0 pts) Load the data set from the file <code>quakedata.txt</code> using <code>numpy.loadtxt</code>, which automatically parses it into a NumPy <code>array</code>. Assign this imported data set the name <code>seis</code> (for <em>seis</em>mogram). The first row contains the time values in seconds, and the second row contains the displacement data from the seismometer.</p>
+<pre><code>seis = np.loadtxt(&#39;quakedata.txt&#39;)</code></pre>
+<p>(You will not answer this question in your answer file, although these data are prerequisite to all subsequent work.)</p>
+<p>Your loaded data set should satisfy the following conditions:</p>
+<pre><code>assert seis.shape == (2,350)
+from numpy import isclose   # a better way to test floating-point values
+                            # in case very small differences exist
+assert isclose(seis[0,1], 1.0)
+assert isclose(seis[1,-1], 0.61910493526870258)</code></pre></li>
+</ol>
+<blockquote>
+Incidentally, these last statements now use a keyword <code>assert</code>. <code>assert</code> is often used in Python for <em>unit testing</em>, which means that a function or data set must satisfy certain known rules to be valid. If you have written the proper unit tests, then they are close to a guarantee that your function works correctly under most conditions or that your data set has been loaded and formatted correctly. We will use unit tests occasionally to enforce &quot;good behavior&quot; of your functions, but these should be used very frequently when you write code. (Look up &quot;test-driven development&quot; sometime.)
+</blockquote>
+<p>Let's see what these data represent as a pictorial seismogram.</p>
+<ol style="list-style-type: decimal">
+<li>(1 pt) Plot the second row of <code>seis</code> against the first. Save the plot as <code>figure_1.png</code> and answer this question with <code>figure_1.png</code> accordingly.</li>
+</ol>
+<h2 id="earthquake-detection">Earthquake Detection</h2>
+<p>An earthquake event can be reconstructed from numerical data by looking at how big the oscillations are—that is, the <em>variance</em>. (Our data set <code>seis</code> clearly contains ) Mathematically, we prefer to use the square root of the variance, or the <em>standard deviation</em>, for convenience. We define the standard deviation of the elements of a list <span class="math inline"><em>X</em></span> as</p>
+<p><br /><span class="math display">$$
+\text{var}(X) = \sqrt{\text{avg}\left( (X - \bar{X})^2 \right)}
+$$</span><br /></p>
+<p>where <span class="math inline">$\bar{X}$</span> is the average of the data set. NumPy conveniently provides a way to calculate the average value of a list of values:</p>
+<pre><code>X = [0.57473, 0.09365, 0.20067, 0.20592]
+X = np.array(X)
+print X.mean()</code></pre>
+<p>NumPy also supports direct calculation of the standard deviation (and several other statistical quantities):</p>
+<pre><code>print X.std()</code></pre>
+<p>Suppose that we have a set of seismograph magnitudes and we wish to detect events above a certain threshold. Using these functions for the average and standard deviation, we can easily calculate the mean and standard deviation for an entire data set, but that doesn't really tell us what we want to know, which is <em>when</em> the earthquake threshold event occurred.</p>
+<div class="figure">
+<img src="./img/mean_stdev_all.png" alt="" width="100%" />
+<!--
+plt.plot(seis[0],seis[1],'b-',
+         seis[0],np.ones_like(seis[0])*(np.mean(seis[1])),'r-',
+         seis[0],np.ones_like(seis[0])*(np.mean(seis[1])+np.std(seis[1])),'r--',
+         seis[0],np.ones_like(seis[0])*(np.mean(seis[1])-np.std(seis[1])),'r--')
+plt.show()
+-->
+
+</div>
+<p>It is better, in cases like this, to use a <em>moving-window</em> or <em>rolling</em> function, which instead returns the calculation based on a subset of the entire data set. For example, a two-point moving average of the data set <code>[3,4,2,5,1]</code> would look like <code>[np.nan, 3.5, 3.0, 3.5, 3.0]</code>—the <span class="math inline"><em>i</em></span>th moving average is the average of the <span class="math inline"><em>i</em> − 1</span>th and <span class="math inline"><em>i</em></span>th values in the original list or array. More generally, the <span class="math inline"><em>n</em></span>-point moving average we will define uses the last <span class="math inline"><em>n</em></span> data values to calculate an average. (<code>np.nan</code> stands for <em>n</em>ot <em>a</em> <em>n</em>umber, a special data type used when you need the data to be a numeric data type but still not carry an actual value.) For instance, a twenty-day rolling average of a data set (probably financial, not seismographic) would look like this:</p>
+<div class="figure">
+<img src="./img/mean_rolling.png" alt="" width="100%" />
+
+</div>
+<!--
+x = np.linspace(0,10,501)
+y = np.cos(x) + normal(size=x.shape)
+rm = rolling_mean(np.array( (x,y) ),20)
+plt.plot(x,     y,     'b:',
+         rm[0], rm[1], 'r-')
+plt.show()
+-->
+<p>These are very useful for smoothing data sets which contain a lot of noise and variability which obscure the true trends. You often see them used in financial analyses, for instance, or to filter electronic signals in electrical engineering.</p>
+<p>This data set has a fairly consistent standard deviation (look at the <math>$y$</math> axis):</p>
+<div class="figure">
+<img src="./img/stdev_rolling.png" alt="" width="100%" />
+
+</div>
+<!--
+rs = rolling_std(np.array( (x,y) ),20)
+plt.plot(rs[0], rs[1], 'r-')
+plt.show()
+-->
+<p>Together, the rolling mean and rolling standard deviation can actually give us a pretty good picture of the statistics of the data set:</p>
+<div class="figure">
+<img src="./img/all_rolling.png" alt="" width="100%" />
+
+</div>
+<!-- plt.plot(x, y, 'b:', rm[0], rm[1], 'r-', rm[0], rm[1]+rs[1], 'r--', rm[0], rm[1]-rs[1], 'r--') plt.show() -->
+<ol start="2" style="list-style-type: decimal">
+<li><p>(4 pts) Compose a function <code>rolling_mean</code> which accepts as parameters an array with rows of time values and of measurements (just like <code>seis</code>) <code>data</code>, and a window size <code>n</code>.</p>
+<p>Create a new array <code>n_mean = np.zeros_like(data)</code>. Assign the first row of <code>data</code> to <code>n_mean</code> (the time values are the same).</p>
+<p>Now loop through the length of the array (since you want the index, not the row). For the <code>n</code> values close to the beginning of the array, you will assign <code>np.nan</code> (not a number) to the array entry (since there are not yet <code>n</code> values to calculate a moving-window average with). For values <code>n</code> and greater, use the last <code>n</code> data points to calculate the moving-window average and assign that value to the array entry in the second row. This expression may help:</p>
+<pre><code>np.mean(data[1,i-n+1:i+1])  # where i is the loop counter</code></pre>
+<p>The function should return the resulting array of time points and calculated rolling-window means.</p>
+<p>Save this function in the file <code>quake.py</code> and answer this question with `quake.py:rolling_mean``.</p></li>
+<li><p>(1 pt) If you have composed the function <code>rolling_mean</code> correctly, the following statements will be satisfied. You should additionally write these unit tests into a function <code>test_rolling_mean</code> which accepts a parameter <code>array</code> (corresponding to <code>seis</code> in this case) and save it in <code>quake.py</code>. No return value is necessary, as the unit test will simply fail if the conditions are not met. Answer this question with <code>quake.py:test_rolling_mean</code>.</p>
+<pre><code>from numpy import isclose
+rm = rolling_mean(array,2)
+assert isclose( rm[1, 2], 0.5*(array[1, 1]+array[1, 2]) )
+assert isclose( rm[1,-1], 0.5*(array[1,-2]+array[1,-1]) )</code></pre>
+<p>The beauty of a unit test is that once you have guaranteed its correctness, the test function <code>test_rolling_mean</code> can always be used to verify that <code>rolling_mean</code> is behaving correctly if you need to make changes to it in the future.</p></li>
+<li><p>(4 pts) Compose a function <code>rolling_std</code> which accepts as parameters an array with rows of time values and of measurements (just like <code>seis</code>) <code>data</code>, and a window size <code>n</code>.</p>
+<p>Create a new array <code>n_std = np.zeros_like(data)</code>. Assign the first row of <code>data</code> to <code>n_std</code> (the time values are the same).</p>
+<p>Now loop through the array. For values closer than <code>n</code> to the lower end of the array, you will assign <code>np.nan</code> (not a number) to the array entry. For values <code>n</code> and greater, use the last <code>n</code> data points to calculate the moving-window standard deviation and assign that value to the array entry in the second row.</p>
+<p>The function should return the resulting array of time points and calculated rolling-window means.</p>
+<p>Save this function in the file <code>quake.py</code> and answer this question with `quake.py:rolling_std``.</p></li>
+<li><p>(1 pt) If you have composed the function <code>rolling_std</code> correctly, the following statements will be satisfied. You should additionally write these unit tests into a function <code>test_rolling_std</code> which accepts a parameter <code>array</code> (corresponding to <code>seis</code> in this case) and save it in <code>quake.py</code>. No return value is necessary, as the unit test will simply fail if the conditions are not met. Answer this question with <code>quake.py:test_rolling_std</code>.</p>
+<pre><code>from numpy import isclose, std
+rs = rolling_std(array,2)
+assert isclose( rs[1, 2], std( (array[1, 1], array[1, 2])) )
+assert isclose( rs[1,-1], std( (array[1,-2], array[1,-1])) )</code></pre></li>
+<li><p>(2 pts) Plot the rolling average with a five-point window against the data set <code>seis</code>. You should also plot the rolling stdev <em>above</em> the average and <em>below</em> it (<em>i.e.</em>, something like <code>rolling_mean(seis,5)[1]+rolling_std(seis,5)[1]</code> and its counterpart). Save this figure as <code>figure_6.png</code> and answer this question accordingly.</p></li>
+</ol>
+<p>With <code>rolling_std</code> in tow, it should be straightforward to identify threshold events (earthquakes or smaller tremors) against a low-noise background.</p>
+<ol start="7" style="list-style-type: decimal">
+<li><p>(1 pt) What is the first point (index) at which the standard deviation exceeds 10.0? We will designate points like these as the beginnings of events. (There's nothing magical about the value 10.0; it's just much larger than the standard deviation of the preceding run of values.)</p></li>
+<li><p>(1 pt) Let's make an attractive plot with earthquake and aftershock data clearly highlighted. NumPy can filter the data by value, meaning that we can select highly-variable data from a lower-variability background and plot them separately.</p>
+<p>Save this figure as <code>figure_8.png</code> and answer this question accordingly.</p>
+<pre><code>rm = rolling_mean(seis, 5)
+rs = rolling_std(seis, 5)
+
+plt.subplot(2, 1, 1)                # create two subplots, use the first
+plt.plot(seis[0,:],seis[1,:], &#39;r-&#39;,
+         rm[0,:], rm[1,:], &#39;b-&#39;)
+plt.title(&#39;Earthquake Seismogram Data&#39;)
+plt.ylabel(&#39;Data and Rolling Mean&#39;)
+
+plt.subplot(2, 1, 2)                # use the second subplot now
+plt.plot(rs[0,:], rs[1,:], &#39;g--&#39;)
+plt.xlabel(&#39;time (s)&#39;)
+plt.ylabel(&#39;Standard Deviation&#39;)
+
+plt.show()</code></pre></li>
+</ol>
+<p>Finally, we can use features of seismogram data to calculate (for instance) how far away the earthquake is. There is typically a lapse between the primary waves (P), the secondary waves (S) and the surface waves<sup>[<a href="http://academic.brooklyn.cuny.edu/geology/grocha/plates/platetec19.htm">RochaND</a>]</sup>. The time lapse between P and S tells us how far away the earthquake occurred (given certain assumptions and observations about the interior of the earth), and the combination of several seismograms from different locations tells us the magnitude and location<sup>[<a href="http://academic.brooklyn.cuny.edu/geology/grocha/plates/platetec20.htm">RochaND</a>]</sup>. That process is fairly involved, so you should simply calculate the S–P time interval from the change in rolling variance.</p>
+<div class="figure">
+<img src="./img/earthquake_data.png" alt="" width="100%" />
+
+</div>
+<p>At what point (in your data) does the standard deviation first exceed 10? This is point P. The next time it falls to a small value for a while and then jumps back up above 10 represents point S. This lapse is the value you should use for the S–P interval.</p>
+<ol start="9" style="list-style-type: decimal">
+<li>(1 pt) What is the distance of the earthquake in miles? (To obtain this value, simply multiply the S–P interval in seconds by 5.7. This is a gross oversimplification generally, but is adequate for the current problem.<sup>[<a href="http://www.oakton.edu/user/4/billtong/eas100lab/lab10quake.htm">TongND</a>]</sup>)</li>
+</ol>
+<!--
+P = 60
+S = 167
+S-P = 107
+107 * 5.7 = 609.9
+-->
+<h2 id="making-your-own-earthquake-data">Making Your Own Earthquake (Data)</h2>
+<blockquote>
+<ol start="17" style="list-style-type: upper-alpha">
+<li><p>What do cows make during an earthquake?</p></li>
+<li>Milkshakes</li>
+</ol>
+</blockquote>
+<p>(Yes, you really just spent five seconds of your lab time reading that.)</p>
+<p>Let's compose a function to generate a data set like that above. While not as exciting as a real earthquake, it's a lot cleaner of a data set to work with.</p>
+<p>We will use a random number generator to generate a list of numbers with a specific standard deviation. Given a number of times and a standard deviation, we want to create a list of random &quot;measurements&quot; which represent the earth's motion during that time.</p>
+<p>We'll make the function more general than this though: it will accept a list of time lengths and a list of corresponding standard deviations. This way we can make longer time series of measurements like that used as <code>seis</code>.</p>
+<ol start="10" style="list-style-type: decimal">
+<li><p>(4 pts, extra credit) Compose a function <code>quake</code> which accepts as parameters a list of time lengths <code>spans</code> and a list of corresponding standard deviations <code>stds</code>.</p>
+<p>The function should first ensure that the lists are the same length and contain only numbers; if either condition is not true, then the function should halt and <code>return None</code>.</p>
+<p>Next, create an array <code>data = np.zeros( (np.sum(spans), 2) )</code>. The function should loop over the time length spans in <code>spans</code> and generate a corresponding number of random data points with the standard deviation in <code>stds</code>. The time should increase uniformly (<em>i.e.</em>, starting from <code>0</code> each time step is one more than the previous time step—the time value and the index will be the same, although one is <code>float</code> and one is <code>int</code>). One way to do this is to assign <code>np.array(range(np.sum(spans))</code> to the first row of <code>data</code>.</p>
+<blockquote>
+<p>The random data points will be created using <code>numpy.random.normal</code>. A <em>normal distribution</em> represents the way most random things in life are distributed; if you dripped drops of paint from a stationary brush, for instance, the pattern they make on the ground would be normally distributed<sup>[<a href="https://en.wikipedia.org/wiki/Normal_distribution">Wikipedia</a>]</sup>. <code>normal</code> is invoked thus:</p>
+<pre><code>from numpy.random import normal
+stdev = 5.0
+normal(loc=0.0, scale=stdev, size=(5,1))</code></pre>
+Every time you run that last line, you will generate a different random number drawn from a normal distribution. Make sure that your <code>scale</code> value in the function is taken from the current element of <code>stds</code> instead.
+</blockquote>
+<p>The function should return the resulting array of time points and generated measurements.</p>
+<p>Save this function in the file <code>quake.py</code> and answer this question with <code>quake.py:quake</code>.</p></li>
+<li><p>(1 pt, extra credit) If you have composed the function <code>quake</code> correctly, the following statements will be satisfied. You should additionally write these unit tests into a function <code>test_quake</code> and save it in <code>quake.py</code>. No return value is necessary, as the unit test will simply fail if the conditions are not met. Answer this question with <code>quake.py:test_quake</code>. (Please don't include the plotting statements in <code>test_quake</code>—they are for your own benefit.)</p>
+<pre><code>spans = [60, 20, 40, 45, 20, 10, 40, 25, 10, 10, 10, 60]
+stds  = [ 1, 20, 10,  1, 15,  5,  1, 60, 20, 10,  1, 1]
+quakedata = quake(spans,stds)
+
+# the sum of spans should equal the final length
+assert quakedata.shape[1] == np.sum(spans)
+assert max(quakedata) &lt; np.sum(quakedata[1])
+
+plt.plot(quakedata[0,:], quakedata[1,:])
+plt.show()</code></pre></li>
+</ol>
+<!-- A.M.D.G. -->
+</div>
+</body>
+</html>

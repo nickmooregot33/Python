@@ -1,0 +1,31 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+games=100000
+visits=np.zeros(40)
+dice=np.arange(1,7)
+#turns=25
+
+for g in range(games):
+	space=0
+	turns=np.random.randint(20,30)
+	for i in range(turns):
+		result1=np.random.choice(6)
+		result2=np.random.choice(6)
+		result=result1+result2
+		space=(space+result)%40
+		visits[space]+=1
+		doubles=0
+		while(result1==result2):
+			doubles+=1
+			result1=np.random.choice(6)
+			result2=np.random.choice(6)
+			result=result1+result2
+			space=(space+result)%40
+			visits[space]+=1
+			if doubles==3:
+				break
+			
+
+plt.bar(np.arange(40),visits)
+plt.show()

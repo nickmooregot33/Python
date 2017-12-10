@@ -1,0 +1,320 @@
+<!doctype html>
+<html>
+<head>
+
+<meta charset="utf-8" />
+<title>CS 101—Lab 10</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="./css/style.css">
+
+<!-- Loading mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+    <style>
+      #math_center { text-align:center; width:100%; background-color:yellow; }
+    </style>
+</head>
+<body>
+<div class="container" id="notebook-container">
+<h2 id="celestial-orbital-mechanics">Celestial &amp; Orbital Mechanics</h2>
+<blockquote>You may work together in pairs for this lab.  If you do, please answer a question number zero in your <code>lab10.txt</code> file with the NetID of your partner.</blockquote>
+<p>The signal achievement of twentieth-century engineering is arguably the moon shot. The combination of finely-tuned instrumentation, enormous rockets for powered flight, and human daring required are a monument of accomplishment. One of the primary systems of the Apollo program was navigation—the calculation and realization of orbital mechanics and celestial maneuvering. Today, you will model orbital mechanics in a multibody solar system.</p>
+<p>A <em>body</em>, in this case, can refer to a planet, a star, a natural or artificial satellite, a rocket, a manned capsule, an asteroid, etc. When we calculate the path of any body, all that matters are the <em>masses</em> and the <em>forces</em>. We make a couple of simplifying assumptions: the mass of a body is focussed at its center as a point mass in two dimensions. (The main risk of this assumption is that we risk calculating one body entering the radius of another; we trust for this lab that distances are large.)</p>
+<div class="figure">
+<img src="./img/bodies.png" alt="" width="100%;" />
+
+</div>
+<blockquote>
+☞<em>Aside</em>: If each one of <span class="math inline"><em>n</em></span> bodies has <span class="math inline"><em>n</em> − 1</span> forces acting on it, then we need to calculate <span class="math inline"><em>n</em> × (<em>n</em> − 1)/2</span> forces, so we say that this problem scales as <span class="math inline"><em>O</em>(<em>n</em><sup>2</sup>)</span>, read &quot;order n squared&quot;.
+</blockquote>
+<p>For each body, we need to keep track of two state variables: <span class="math inline"><em>m</em></span>, <span class="math inline">$\arrow{x}$</span>. We will store each body as a dictionary with entries for mass and position:</p>
+<pre><code>body:
+    &#39;m&#39; → float
+    &#39;x&#39; → np.ndarray(dtype=float64)</code></pre>
+<p>Let's see how this works for a single body acted on by a uniform force. (This is equivalent to the glass falling off of a table, only sideways and with no floor.)</p>
+<h3 id="the-one-body-problem">The One-Body Problem</h3>
+<blockquote>
+“Provide ships or sails adapted to the heavenly breezes, and there will be some who will brave even that void.” (Johannes Kepler to Galileo Galilei, 1610)
+</blockquote>
+<p>First, we need a way to model and track the motion of a single body acting under a force. Consider, for instance, a solar sail being propelled by a the force of a uniform solar wind<sup>[<a href="https://en.wikipedia.org/wiki/Solar_sail">Wikipedia</a>]</sup>. Such a solar sail will experience a force on it of, say, 5 newtons for every 640,000 m<sup>2</sup> of area. The acceleration the sail body experiences may be calculated according to Newton's second law:</p>
+<p><br /><span class="math display"><em>F</em> = <em>m</em><em>a</em></span><br /></p>
+<p>or, given the mass of the ultraefficient lattice sailer, <span class="math inline">$m = 0.07\,\text{g}\cdot\text{m}^{-2} \times 6.4\cdot 10^{5} \,\text{m}^{2} = 4.48\cdot 10^{4} \,\text{g} = 44.8 \,\text{kg}$</span>, we find the acceleration to be <span class="math inline"><em>a</em> = <em>F</em>/<em>m</em> = (5 N)/(44.8 kg) = 0.1116 m ⋅ s<sup> − 2</sup></span>. (in reality, the conversion of light force to acceleration is not 100% efficient, but we will not include that effect in our calculation.)</p>
+<p>If we wish to calculate the position of the solar sail in this model as a function of time, we can simply loop over the simulation for each time index, solving the equation of motion (Newton's second law) for the sail at each step. For each time interval, we calculate the force on the solar sail (in this case, a constant) and the resulting acceleration. A complete script for this process is:</p>
+<pre><code>import numpy as np
+
+# Create array of time indices.
+t_start = 0.0                           # initial time, s
+t_end = 1.001                           # final time, s
+dt = 1e-3                               # time step size, s
+times = np.arange(t_start, t_end, dt)   # array of time steps
+nt = len(times)                         # number of time steps
+
+# Create solar sail body.
+sail = {&#39;m&#39;: 44.8,                  # kg
+        &#39;x&#39;: np.zeros( (nt, 2) )}   # position history, m
+sail[&#39;x&#39;][0] = np.array( (0, 0) )   # initial position, m
+sail[&#39;x&#39;][1] = np.array( (0, 0) )   # initial position, m
+
+# Integrate equations of motion forward.
+for i,t in enumerate(times):
+    if i == 0:
+        continue    # if first time step, we already have initial condition
+    if i+1 == nt:
+        continue    # the last time step is calculated in the loop prior
+    
+    # Calculate force on body.
+    force = np.array( ( 5.0 , 0.0 ) )   # force along x-axis, N
+    
+    # Update position.
+    xnew = 2*sail[&#39;x&#39;][i] - sail[&#39;x&#39;][i-1] + force/sail[&#39;m&#39;]*dt**2
+    
+    sail[&#39;x&#39;][i+1] = xnew
+    
+    # Output the results.
+    print &#39;Time %f:  sail at (%f, %f).&#39;%(t,sail[&#39;x&#39;][i,0],sail[&#39;x&#39;][i,1])
+
+print &#39;The final position of the solar sail is (%f, %f).&#39;%(sail[&#39;x&#39;][-1,0],sail[&#39;x&#39;][-1,1])</code></pre>
+<p>A couple of comments on this script:</p>
+<ul>
+<li><p>We set two initial positions at the first and second time steps. This fixes the initial velocity at zero.</p></li>
+<li><p>We skip the last time step, because each loop calculates the position for the time <code>i+1</code>.</p></li>
+</ul>
+<ol start="1" style="list-style-type: decimal">
+<li><p>(1 pt) Plot the resulting vector of <span class="math inline"><em>x</em></span> positions of the sail versus time <span class="math inline"><em>t</em></span>. (Note that the variable <code>t</code> is not the same as <span class="math inline"><em>t</em></span> here—<code>t</code> is a single time step in the loop, and <span class="math inline"><em>t</em></span> is the domain of times for which we have calculated out values.) Save the plot as <code>figure_1.png</code> and answer this question with <code>figure_1.png</code> accordingly.</p></li>
+<li><p>(1 pt) What is the final position (as a tuple)?</p></li>
+<li><p>(2 pts) Convert the foregoing snippet into a function <code>loop</code> which accepts as a parameter a time step size <code>dt</code> and returns a tuple. The tuple should contain the times and the resulting body with time history (<code>sail</code> in this example). You do not need to retain the <code>print</code> statements after you are through debugging the code.</p>
+<p>Save this function in the file <code>sail.py</code> and answer this question with <code>sail.py:loop</code>.</p>
+<p>The following code should produce a plot if you have done the foregoing correctly:</p>
+<pre><code>import matplotlib.pyplot as plt
+(times, sail) = loop(1e-3)
+plt.plot(times, sail[&#39;x&#39;])
+plt.show()</code></pre></li>
+</ol>
+<p>Before we continue with more interesting orbital mechanics, let's take a brief look at numerical error. Plot the following curves on the same plot with different lines and colors for each.</p>
+<pre><code>    (times1, sail1) = loop(1e-1)
+    (times2, sail2) = loop(1e-2)
+    (times3, sail3) = loop(1e-3)
+    (times4, sail4) = loop(1e-4)</code></pre>
+<p>Although it may be hard to see the finest elements (<code>sail4</code>), the trend is towards a single highly accurate solution. This is called <em>convergence</em>, and is characteristic of a good numerical model. Clearly, if we wish to calculate the motion of a body like a satellite around a planet, we would do well to use a sufficiently small time step in our numerical algorithm.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>(1 pt) Save the plot as <code>figure_4.png</code> and answer this question with <code>figure_4.png</code> accordingly.</li>
+</ol>
+<h3 id="the-two-body-problem">The Two-Body Problem</h3>
+<p>Next, we would like to simulate the orbit of a natural satellite around a planet. We will call our bodies the Earth and the moon, but we will use altered mass and velocity values in order to solve the motion in a reasonable amount of time<sup>[<a href="http://nssdc.gsfc.nasa.gov/planetary/factsheet/moonfact.html">NASA</a>]</sup>. The primary differences are that we have to loop over <em>two</em> bodies now, and we have to calculate a force due to gravity rather than just a simple force.</p>
+<div class="figure">
+<img src="./img/moon.png" alt="" width="100%;" />
+
+</div>
+<p><span class="math inline">$V = \sqrt{\frac{GM}{r}}$</span></p>
+<p>In addition, the mass of the earth and moon are extremely large, and the gravitational constant is extremely small. This makes the actual natural system extremely difficult to simulate numerically using the tools available to us now. We will therefore scale the mass of the planets down (but still leave them roughly proportional to each other) and tweak gravity a bit so we can solve the problem without taking an enormous amount of time. We also assume in this question that the earth is stationary (not a bad assumption in this case, but in reality they both orbit the combined center of mass).</p>
+<pre><code>import numpy as np
+
+def dist(a):
+    return np.sqrt(np.sum(a**2))
+
+def f_g(m1, x1, m2, x2):
+    d  = dist(x2 - x1)
+    G  = 1.0
+    return -G * m1 * m2 / d**3 * (x2-x1)
+
+# Create array of time indices.
+t_start = 0.0                           # initial time
+t_end = 750                            # final time
+dt = 1e-3                               # time step size
+times = np.arange(t_start, t_end, dt)   # array of time steps
+nt = len(times)                         # number of time steps
+
+# Create bodies for earth and moon.
+earth = {&#39;m&#39;: 1000,                  # mass
+         &#39;x&#39;: np.zeros( (nt, 2) )}  # position history
+earth[&#39;x&#39;][0] = np.array( (0, 0) )  # initial position
+earth[&#39;x&#39;][1] = np.array( (0, 0) )  # initial position
+
+moon  = {&#39;m&#39;: 0.01,                    # mass
+         &#39;x&#39;: np.zeros( (nt, 2) )}  # position history
+vel_init = 1.0                      # initial velocity of moon
+moon[&#39;x&#39;][0] = np.array( ( vel_init*dt/2, 100) ) # initial pos + vel
+moon[&#39;x&#39;][1] = np.array( (-vel_init*dt/2, 100) ) # initial pos + vel
+
+# Integrate equations of motion forward.
+for i,t in enumerate(times):
+    if i == 0 or i+1 == nt:
+        continue    # if first time step, we already have initial condition
+                    # and the last time step is calculated in the loop prior
+    
+    # Calculate forces on earth and moon
+    force = f_g(moon[&#39;m&#39;], moon[&#39;x&#39;][i], earth[&#39;m&#39;], earth[&#39;x&#39;][i])
+    
+    # Update position of moon (earth is stationary)
+    moon[&#39;x&#39;][i+1]  = 2*moon[&#39;x&#39;][i]  - moon[&#39;x&#39;][i-1]  - force/moon[&#39;m&#39;] *dt**2
+
+import matplotlib.pyplot as plt
+plt.plot(moon[&#39;x&#39;][:,0],  moon[&#39;x&#39;][:,1],  &#39;b-&#39;,
+         earth[&#39;x&#39;][:,0], earth[&#39;x&#39;][:,1], &#39;ro&#39;)
+plt.show()</code></pre>
+<p>Take a moment to go through the code and understand what each line is doing, particularly in the loop.</p>
+<p>We provide a function <code>f_g</code> which calculates the force due to gravity as well, using a modified gravitational constant which renders the simulation solvable in the lab time.</p>
+<p>We also provided the function <code>dist</code>, which calculates the distance along a direction vector. If you require the distance between two bodies, simply subtract one position <code>a</code> from the other <code>b</code>: <code>dist(a - b)</code>.</p>
+<ol start="5" style="list-style-type: decimal">
+<li><p>(2 pts) Convert the foregoing snippet into a function <code>loop</code> which accepts as a parameter a maximum time <code>t_end</code>, a time step size <code>dt</code>, and an initial velocity <code>vel_init</code> and returns a three-element tuple. The tuple should contain the times and the resulting bodies with time history (<code>(times, earth, moon)</code> in this example). You should not retain the plotting statements in the function, although you may wish to keep the <code>print</code> statement so you know that the calculation is proceeding.</p>
+<p>Save this function in the file <code>moon.py</code> and answer this question with <code>moon.py:loop</code>.</p>
+<p>If you have done the foregoing correctly, the following should produce a plot of a roughly circular or elliptical orbit:</p>
+<pre><code>import matplotlib.pyplot as plt
+(times, earth, moon) = loop(1000, 1e-3, 1.0)
+plt.plot(moon[&#39;x&#39;][:,0],  moon[&#39;x&#39;][:,1],  &#39;b-&#39;,
+         earth[&#39;x&#39;][:,0], earth[&#39;x&#39;][:,1], &#39;ro&#39;)
+plt.show()
+
+plt.plot(times, moon[&#39;x&#39;][:,0], &#39;gx&#39;,
+         times, moon[&#39;x&#39;][:,1], &#39;co&#39;)
+plt.show()</code></pre></li>
+</ol>
+<!--
+We should calculate the kinetic energy as well, as this lets us track whether our algorithm is staying consistent.  (Energy should be conserved in a physical simulation, so the kinetic energy shouldn't change very much at all in the simulation.)
+
+1.  This line will calculate the kinetic energy at each time step.
+    
+    
+    What is the initial kinetic energy for case ?
+    
+    What is the final kinetic energy?
+-->
+<h3 id="the-three-body-problem">The Three-Body Problem</h3>
+<p>When we move into the realm of many-body calculations, it soon becomes cumbersome to maintain separate variable names for each variable.</p>
+<p>As any significant calculation will involves multiple bodies, we will maintain a list of bodies called <code>bodies</code> which contains the dictionaries with each body's properties.</p>
+<p>We will create the bodies and then pass them to a loop which is similar to those you have just written. This loop will accept a list of bodies and time parameters for the simulation, and return the times and positions of the bodies as before. In order to realize this, it must loop over pairs of bodies (the heart of the numerics below). Although this is one of the longest programs you have yet seen, focus on the comments explaining what each section does rather than worrying about the numerical algorithms in detail—you'll have plenty of exposure to these in coming years when you're ready.</p>
+<pre><code>import numpy as np
+
+def dist(a):
+    return np.sqrt(np.sum(a**2))
+
+def f_g(m1, x1, m2, x2):
+    d  = dist(x2 - x1)
+    G  = 1.0
+    return -G * m1 * m2 / d**3 * (x2-x1)
+
+# Create array of time indices.
+t_start = 0.0                           # initial time
+t_end = 50                              # final time
+dt = 1e-3                               # time step size
+times = np.arange(t_start, t_end, dt)   # array of time steps
+nt = len(times)                         # number of time steps
+vel_init = 1.0                          # initial velocity
+
+# Create three orbiting bodies.
+bodies = []
+
+earth = {&#39;m&#39;: 1000,                 # mass
+         &#39;x&#39;: np.zeros( (nt, 2) )}  # position history
+earth[&#39;x&#39;][0] = np.array( (0, 0) )  # initial position
+earth[&#39;x&#39;][1] = np.array( (0, 0) )  # initial position
+bodies.append(earth)
+
+moon = {&#39;m&#39;: 0.01,                  # mass
+        &#39;x&#39;: np.zeros( (nt, 2) )}   # position history
+moon_vel = vel_init                         # initial velocity of moon
+moon[&#39;x&#39;][0] = np.array( (-moon_vel*dt/2, 100) ) # initial pos + vel
+moon[&#39;x&#39;][1] = np.array( ( moon_vel*dt/2, 100) ) # initial pos + vel
+bodies.append(moon)
+
+caps = {&#39;m&#39;: 0.001,                 # mass
+       &#39;x&#39;: np.zeros( (nt, 2) )}    # position history
+caps_vel = 10.0*vel_init                    # initial velocity of moon
+caps[&#39;x&#39;][0] = np.array( (-caps_vel*dt/2, 20) ) # initial pos + vel
+caps[&#39;x&#39;][1] = np.array( ( caps_vel*dt/2, 20) ) # initial pos + vel
+bodies.append(caps)
+
+
+# Integrate equations of motion forward.  (This will be your `loop` function.)
+for i,t in enumerate(times):
+    if i == 0 or i+1 == nt:
+        continue    # if first time step, we already have initial condition
+                    # and the last time step is calculated in the loop prior
+    
+    # Calculate forces on bodies.
+    forces = np.zeros( (len(bodies), 2) )
+    for body_j in range(len(bodies)):
+        for body_k in range(body_j+1, len(bodies)):
+            this_force = f_g(bodies[body_j][&#39;m&#39;], bodies[body_j][&#39;x&#39;][i], bodies[body_k][&#39;m&#39;], bodies[body_k][&#39;x&#39;][i])
+            forces[body_j] += this_force
+            forces[body_k] -= this_force
+    
+    # Update position of moon (earth is stationary)
+    for body_j in range(len(bodies)):
+        bodies[body_j][&#39;x&#39;][i+1] = 2*bodies[body_j][&#39;x&#39;][i] - bodies[body_j][&#39;x&#39;][i-1] - forces[body_j]/bodies[body_j][&#39;m&#39;] *dt**2
+
+    print i
+
+import matplotlib.pyplot as plt
+plt.plot(moon[&#39;x&#39;][:,0],  moon[&#39;x&#39;][:,1],  &#39;b-&#39;,
+         earth[&#39;x&#39;][:,0], earth[&#39;x&#39;][:,1], &#39;ro&#39;,
+         caps[&#39;x&#39;][:,0],  caps[&#39;x&#39;][:,1],  &#39;c-&#39;)
+plt.show()</code></pre>
+<ol start="6" style="list-style-type: decimal">
+<li><p>(2 pts) Convert the foregoing snippet into a function <code>loop</code> which accepts as a parameter a maximum time <code>t_end</code>, a time step size <code>dt</code>, and an initial velocity <code>vel_init</code> and returns a two-element tuple. The tuple should contain the times and a list of the resulting bodies with time history (<code>(times, bodies)</code> in this example). You should not retain the plotting statements in the function, although you may wish to keep the <code>print</code> statement so you know that the calculation is proceeding.</p>
+<p>Save this function in the file <code>3bp.py</code> and answer this question with <code>3bp.py:loop</code>.</p>
+<p>If you have done the foregoing correctly, the following should produce a plot of a roughly circular or elliptical orbit:</p>
+<pre><code>(times,bodies) = loop(50, 1e-3, 1.0)
+earth = bodies[0]
+moon = bodies[1]
+caps = bodies[2]
+
+import matplotlib.pyplot as plt
+plt.plot(moon[&#39;x&#39;][:,0],  moon[&#39;x&#39;][:,1],  &#39;b-&#39;,
+         earth[&#39;x&#39;][:,0], earth[&#39;x&#39;][:,1], &#39;ro&#39;,
+         caps[&#39;x&#39;][:,0],  caps[&#39;x&#39;][:,1],  &#39;c-&#39;)
+plt.show()</code></pre></li>
+</ol>
+<p>If we wish to compare plots side by side, we can use <em>subplots</em>. Subplots occupy the same <em>figure</em> (<em>i.e.</em>, they are shown together by <code>show()</code>) but have different <em>axes</em>. To plot the orbits of each body in a separate plot, you could do the following:</p>
+<pre><code>fig, axes = plt.subplots(2, sharex=True)
+axes[0].plot(moon[&#39;x&#39;][:,0], moon[&#39;x&#39;][:,1])
+axes[1].plot(caps[&#39;x&#39;][:,0], caps[&#39;x&#39;][:,1])
+plt.show()</code></pre>
+<ol start="7" style="list-style-type: decimal">
+<li>(1 pt) Save the plot as <code>figure_7.png</code> and answer this question with <code>figure_7.png</code> accordingly.</li>
+</ol>
+<blockquote>
+<strong>N.B.</strong>: This was the last question, and the remainder of this lab is informational. You may submit your work now and finish if you wish.
+</blockquote>
+<p>Now how could we simulate a rocket or a powered space flight vehicle? Well, we simply need to add the force on that object into our equations. This is left as an extracurricular exercise for you if you are interested.</p>
+<p>In addition, you may play with the starting positions and velocities of the capsule. See if you can recreate a gravitational slingshot<sup>[<a href="https://en.wikipedia.org/wiki/Gravity_assist">Wikipedia</a>]</sup>.</p>
+<h3 id="the-n-body-problem">The <span class="math inline"><em>n</em></span>-Body Problem</h3>
+<p>Although in the interest of time we will not generalize this problem further, you should be able to take the three-body problem and generalize it to simulate as many bodies (satellites, planets, rockets) as you like.</p>
+<p>Since there is no analytical solution to the <span class="math inline"><em>n</em></span>-body problem, and it is well-characterized by Newton's laws, the <span class="math inline"><em>n</em></span>-body problem has long stood as a challenge of numerical accuracy<sup>[<a href="https://web.archive.org/web/20010220232131/http://www.geom.umn.edu/~megraw/CR3BP_html/cr3bp.html">UMN</a>]</sup>.</p>
+<p>In practice, astronomers and space scientists often do not start from Newton's equation of motion (second law) to calculate the position of planets and other celestial bodies. This is because this approach neglects the relative importance of different scale factors (a numerical problem). More often, they assume that the orbits are Keplerian and then calculate small perturbative corrections to them.</p>
+<!--
+http://what-when-how.com/space-science-and-technology/earth-orbiting-satellite-theory/
+https://www.maplesoft.com/content/EngineeringFundamentals/49/MapleDocument_46/Orbita_Mechanics.pdf
+* http://www.arachnoid.com/gravitation_equations/orbital_mechanics.html
+http://ac.els-cdn.com/B9780123747785000179/3-s2.0-B9780123747785000179-main.pdf?_tid=e2cb8462-777a-11e5-92ec-00000aab0f6c&acdnat=1445380718_ba9f8de6d061ef4eab6bc68a59b5477c
+http://www.braeunig.us/space/orbmech.htm
+http://butikov.faculty.ifmo.ru/ManyBody.pdf
+-->
+<!-- A.M.D.G. -->
+</div>
+</body>
+</html>

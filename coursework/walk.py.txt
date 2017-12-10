@@ -1,0 +1,25 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+size=101
+visits=np.zeros((size,size))
+n=np.array((1,0))
+s=np.array((-1,0))
+e=np.array((0,1))
+w=np.array((0,-1))
+
+choices=[n,s,e,w]
+
+
+simulations=1000
+for g in xrange(simulations):
+	position=np.array((size/2,size/2))
+	steps=1000
+	for s in xrange(steps):
+		direction=np.random.randint(0,4)
+		position+=choices[direction]
+		position%=size
+		visits[position[0]][position[1]]+=1
+
+plt.matshow(visits)
+plt.show()

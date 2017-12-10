@@ -1,0 +1,400 @@
+<!doctype html>
+<html>
+<head>
+
+<meta charset="utf-8" />
+<title>CS 101—Lab 2</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="./css/style.css">
+
+<!-- Loading mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+</head>
+<body>
+<div class="container" id="notebook-container">
+<h1 id="literals-operators-variables-expressions">Literals, Operators, Variables, &amp; Expressions</h1>
+<!-- tags:  literal, variable, operator, expression -->
+<blockquote>
+<p>︎❖ <em>Objectives</em>:</p>
+<ol style="list-style-type: decimal">
+<li><p>Explain the difference between and utility of literals and variables.</p></li>
+<li>Write reasonably complex expressions to calculate quantities.</li>
+</ol>
+</blockquote>
+<ul>
+<li>
+Write your NetID at the top of a new blank text file and save it as `lab2.txt` in the `Desktop/lab2` directory.
+</li>
+</ul>
+<h2 id="literals-variables">Literals &amp; Variables</h2>
+<h3 id="numbers-as-literals">Numbers as Literals</h3>
+<p>You have seen a lot of basic numerical expressions by this time, in the first lab and second and third lectures. Now we'd like to unpack those data a little better, and see how they can be used intelligibly. (We'll explore the notion of data <em>type</em> in more detail next week, but for now you just need to see the differences in behavior in context.)</p>
+<p>Python &quot;knows about&quot; two kinds of numbers: integers and floating-point numbers. Integers are the set of whole numbers, positive and negative:</p>
+<p><br /><span class="math">...,  − 5,  − 4,  − 3,  − 2,  − 1, 0,  + 1,  + 2,  + 3,  + 4,  + 5, ...</span><br /></p>
+<p>Integers (<code>int</code>s) are simply represented by typing a whole number <em>without</em> any decimal point. 2 128 987654321 79228162514264337593543950336 -4294967296</p>
+<p>Floating-point numbers (<code>float</code>s) represent numbers with a fractional component. They typically include a decimal point <code>.</code> somewhere. If you write a number using exponential notation (<code>1e3</code> for $110^3), it is automatically a <code>float</code>.</p>
+<pre><code>5.0
+5.
+5.7
+2.71828
+-0.00001
+1e5
+1.564e15
+1.54643e-4
+79228162514264337593543950336e-16</code></pre>
+<blockquote>
+☞<em>Aside</em>: Note that Python &quot;chops off&quot; the fractional value at some point down the line; it is very difficult to store arbitrarily small components. We'll cover the nontrivial consequences of this in more detail in a later lab.
+</blockquote>
+<p>Why carry around two kinds of numbers? At one level, it simply makes sense: there are physical and mathematical quantities that are incapable of fractional counting. (There is no such thing as half of a cloud—unless one means that only half of an entire cloud is being referred to.) Integers are well-adapted to these cases. Similarly, one cannot label, say, cans of paint in a straightforward manner using fractions—one simply counts <span class="math">1, 2, 3, 4, ...</span>. Other values, of course, are continuous: you can have minute fractions of difference in temperature, or in luminosity, or other quantities. Thus the use of both whole-number (<code>int</code>) and part-number (<code>float</code>) categories is well-substantiated by the natural measurements we already make in our observation of the natural world.</p>
+<p>The use of literals in code is referred to as <em>hard-coding</em>. This means that specific values, like the numeric value of <span class="math"><em>π</em></span> or <span class="math"><em>e</em></span>, are written out in the program somewhere because they <em>should be</em> precise and unchanging. Literals also include text strings (briefly seen in the last lab); messages are frequently hard-coded, like the error<sup>[<a href="https://www.youtube.com/watch?v=OEu4Iq5KL-Q">Kubrick1968</a>]</sup>:</p>
+<pre><code>print &#39;All that glitters is not gold.&#39;
+print &#39;Who knows what evil lurks in the hearts of men?  The Shadow knows.&#39;
+print &#39;I&#39;m afraid I can&#39;t do that.&#39;</code></pre>
+<p>That last one has a problem, doesn't it? We wrote a string by marking the ends with single quotes <code>'</code>, but then used a single quote inside of the string. This is why Python lets you use <em>either</em> single <code>'</code> or double quotes <code>&quot;</code> to mark the beginning and end of a string:</p>
+<pre><code>print &quot;I&#39;m afraid I can&#39;t do that.&quot;
+print &#39;They Call the Wind &quot;Maria&quot;&#39;</code></pre>
+<p>How could you write the following phrases as strings?</p>
+<ol start="1" style="list-style-type: decimal">
+<li>George Orwell's novel 1984</li>
+<li>This is a straight double quote, &quot;, while these are curly double quotes: “, ”.</li>
+</ol>
+<p>You see that Python converts the double quotes into a special representation. Don't worry about trying to decipher these, but they frequently occur when one uses accents or special characters beyond the basic set of letters, numbers, and punctuation.</p>
+<p>If things get <em>really</em> hairy, you can also use triple-quotes to mark a string:</p>
+<ol start="3" style="list-style-type: decimal">
+<li><code>'''She then turned and asked the librarian, &quot;Do you have a copy of Diderot's and d'Alembert's Encyclopedie?&quot;'''</code></li>
+</ol>
+<p>Note in this case that Python marks the interior single quotes with backslashes as well. This is known as <em>escaping</em> the single quotes, and tells Python to always interpret them as part of the string rather than as the limit of the string.</p>
+<h4 id="variables">Variables</h4>
+<p>Variables are ways of storing the results of past calculations in a reusable reference.</p>
+<p>If a scientist is working with a physical quantity (such as pressure), he would naturally assign it a symbol such as <span class="math"><em>P</em></span>. He could then use <span class="math"><em>P</em></span> in appropriate mathematical expressions without needing the specific numerical value until actually calculating the result. For instance, the ideal gas law represents the relationship between pressure <span class="math"><em>P</em></span>, temperature <span class="math"><em>T</em></span>, and volume <span class="math"><em>V</em></span>. It is much more convenient to write the short form of the law as</p>
+<p><br /><span class="math"><em>P</em><em>V</em> = <em>R</em><em>T</em></span><br /></p>
+<p>(where <span class="math"><em>R</em></span> is the ideal gas constant<sup>[<a href="https://en.wikipedia.org/wiki/Gas_constant">Wikipedia</a>]</sup>) than it is to produce tables of numerical data describing the relations between these three variables. (In the years before computers became widely available, we did publish books containing tables with logarithms, Bessel functions, and other special functions calculated for many values.)</p>
+<p>We call such a persistent symbol a <em>variable</em>; it allows you to refer to a specific value (possibly unknown at the time of writing the code). In computing with Python, you simply express the variable as:</p>
+<pre><code>x = 5</code></pre>
+<p>The <code>=</code> sign is a directive to Python telling it that henceforward when you type <code>x</code> in an expression Python should replace <code>x</code> with the value it points to, <code>5</code>. We call this an <em>assignment statement</em>. Type <code>x = 5</code> and try:</p>
+<ol start="4" style="list-style-type: decimal">
+<li><code>x</code></li>
+<li><code>x ** 2</code></li>
+<li><code>x % 2</code></li>
+<li><code>x ** x</code></li>
+<li><code>x / x</code></li>
+</ol>
+<p>Another way to think of variables is as sticky notes. If we consider a <em>value</em> (a computer representation of a number, of text, etc.) as occupying a place in the computer's memory, then we can mark that location using a variable. This is like taking a sticky note, writing a label on it, and attaching it to a value. Every time you need to refer to that value, you simply refer to the name on the sticky note (the variable).</p>
+<pre><code>x = 5</code></pre>
+<div class="figure">
+<img src="./img/sticky-note.png" />
+
+</div>
+<p>In this diagram, the blue box represents a location in the computer memory which contains a value (in this case, the number <code>5</code>). But rather than having to know up front where in the memory this value <code>5</code> is stored, we can simply refer to <code>x</code> and rely on the fact that <code>5</code> was calculated or given to <code>x</code> earlier.</p>
+<p>Different locations in computer memory contain different values or types of data—or even the same values!</p>
+<pre><code>x = 5
+a = 5
+b = 3</code></pre>
+<div class="figure">
+<img src="./img/sticky-note-multi.png" />
+
+</div>
+<p>In this case, <code>x</code> and <code>a</code> both happen to refer to the value <code>5</code>, but that is a coincidence. (It's like having two sheets of paper with <code>5</code> written on them and the sticky notes <code>a</code> and <code>x</code> attached to one each. There are still <em>two</em> sheets of paper that are different.)</p>
+<p>We can reclaim the name <code>x</code> for a new value by simply pointing the name <code>x</code> at a new value:</p>
+<pre><code>x = 7
+print x</code></pre>
+<p>You can think of a variable like a sticky note which we've placed on a particular value. We can use that sticky note to point to a value, or we can do what we just did—pick up the label <code>x</code> and put it onto another value.</p>
+<div class="figure">
+<img src="./img/sticky-note-swap.png" />
+
+</div>
+<p>The original value is &quot;lost&quot; since there isn't a variable name telling us where it is any more.</p>
+<p>Of course, as we mentioned a moment ago, multiple variables can be used in Python simultaneously:</p>
+<pre><code>a = 7
+b = -1</code></pre>
+<p>What is the result of:</p>
+<ol start="9" style="list-style-type: decimal">
+<li><code>a*b</code></li>
+<li><code>-a**b</code></li>
+<li><code>a * 4*b</code></li>
+<li><code>a / b + a * b</code></li>
+<li><code>complex(a,b)</code> (This makes a new complex number <span class="math"><em>a</em> + <em>i</em><em>b</em></span>, where Python uses the engineer's <span class="math"><em>j</em></span> instead of the mathematician's <span class="math"><em>i</em></span> to express the imaginary component.)</li>
+</ol>
+<p>You are not limited to single-character variable names. You can write out entire words as variable names:</p>
+<pre><code>trees_observed = 4
+max_torque = 5.0
+middleInitial = &#39;L&#39;
+finalSum = 107
+way_to_Tipperary = &#39;east-north-east&#39;
+warning_msg = &quot;I am Jack&#39;s medulla oblongata.&quot;</code></pre>
+<p>Some names simply don't work due to the rules of Python:</p>
+<pre><code>1st = 16.5
+$ = 2</code></pre>
+<p>The error that occurs in both of these cases, <code>SyntaxError</code>, generally means that you've mistyped something or tried to express something impossible by the rules of Pythonic syntax. Basically, as long as you use only letters, numbers, and the underscore <code>_</code> in your variable names, you'll be fine—and don't start with a number.</p>
+<ol start="14" style="list-style-type: decimal">
+<li><p>Why doesn't</p>
+<pre><code>user-name = &#39;catharine&#39;</code></pre>
+<p>work as a variable name definition? (Think about the form of the variable name.)</p></li>
+</ol>
+<p>The introduction of variables will allow us to perform more sophisticated calculations when we discuss expressions in a few minutes. But there's another reason for using variables instead of literals in your code: variables make it easy for you to change <em>one</em> value <em>once</em> and have it changed everywhere after.</p>
+<p>For instance, consider a program to calculate the heat transfer coefficient across a wall. Given the values <span class="math"><em>h</em> = 7.9 watt/meter<sup>2</sup>/<sup> ∘ </sup>C</span> and an observed difference in temperature between the fluid and the surface <span class="math">Δ<em>T</em> = 1.2 <sup> ∘ </sup>C</span>, the heat transfer coefficient <span class="math"><em>q</em></span> is<sup>[<a href="https://en.wikipedia.org/wiki/Heat_transfer_coefficient">Wikipedia</a>]</sup></p>
+<p><span class="math"><em>q</em> = <em>h</em>Δ<em>T</em>.</span><br /></p>
+<p>You could write this simple algebraic expression using hard-coded values:</p>
+<pre><code>q = 7.9 * 1.2  # difference in temperature between fluid and surface, deg C</code></pre>
+<p>but any future change or reuse of these numbers requires you to go back and change them manually. <em>Or</em> you could write a better code which uses <code>7.9</code> once and then uses the variable <code>h</code> everywhere else:</p>
+<pre><code>h = 7.9  # heat transfer coef, W/m^2/deg C
+DT = 1.2  # difference in temperature between fluid and surface, deg C
+q = h * DT  # heat flux or amount of heat transferred, W/m^2</code></pre>
+<p>This second snippet is both more readable and more flexible, since later on you may wish to use <span class="math"><em>h</em></span> and <span class="math"><em>q</em></span> again in a different expression.</p>
+<p>You can also specify mathematical constants for reuse:</p>
+<pre><code>e = 2.718281828</code></pre>
+<ol start="15" style="list-style-type: decimal">
+<li><code>e ** 2</code></li>
+</ol>
+<p>Incidentally, when we write a statement such as</p>
+<pre><code>max_torque = 5.0</code></pre>
+<p>we are formally incomplete. Physical quantities have physical dimensions; torque has dimensions of force×distance (here in newton-meters, N·m). If we wish to document these with the value (and we <em>always</em> do!), we should use a <em>comment</em> afterwards:</p>
+<pre><code>max_torque = 5.0  #N*m</code></pre>
+<p>Everything after the hash sign <code>#</code> is ignored by Python as if it did not exist. Thus the message is meant for you the human user, and other coders who may come after to look at your code. In the definition of variables, we can use the comment as an informal way for tracking our unit system and making sure that we are not accidentally mixing meters and millimeters, for instance.</p>
+<pre><code>time_step = 0.1  #s</code></pre>
+<ol start="16" style="list-style-type: decimal">
+<li><code>time_step</code></li>
+</ol>
+<p>Or even better, include a brief explanation:</p>
+<pre><code>dx = 1e-2  #mesh discretization, m</code></pre>
+<ol start="17" style="list-style-type: decimal">
+<li><code>dx</code></li>
+</ol>
+<p>Form this habit now and it will serve you well when you begin writing scripts. There's little more unpleasant in the world of computation than dissecting uncommented code.</p>
+<h3 id="strings-as-literals-and-variables">Strings as Literals and Variables</h3>
+<p>Since we communicate with the Python intepreter using text commands, we also need a way to distinguish between <em>instructions to the machine</em> (code) and <em>messages written as text</em> (strings). You have seen these briefly in the first week's lecture, and will examine them in more detail next time. For now, let's just briefly take a look at how strings work as literals and variables.</p>
+<p>Recall that a string allows Python to distinguish between the following lines of code:</p>
+<pre><code>print hello world</code></pre>
+<p>and</p>
+<pre><code>print &#39;hello world&#39;</code></pre>
+<p>The string is a container which holds the words within quotes as a single unit.</p>
+<p>Following the pattern for <code>print</code> above, you can print a generic message to the user directly to the screen:</p>
+<pre><code>print &#39;Welcome to the jungle.&#39;</code></pre>
+<p>It is also convenient to put strings together:</p>
+<pre><code>name = &#39;Axel&#39;
+print &#39;Welcome to the jungle, &#39;, name</code></pre>
+<p>In this case, the first string <code>'Axel'</code> is assigned to the variable <code>name</code>. <code>name</code> is then available to subsequent statements; in this case, to personalize a message. (This is what software like apps and social media do—pull in a generic message and pair it with a specific string variable containing a user name.)</p>
+<p>Or, with two variables, it looks like this:</p>
+<pre><code>first_name = &#39;Albert&#39;
+last_name = &#39;Einstein&#39;
+print first_name, last_name</code></pre>
+<p>In short, to return to our sticky note analogy above, we have now extended to a new kind of value that a sticky note can attach to.</p>
+<pre><code>dol_sign = &#39;$&#39;
+vocab = &#39;capricious&#39;</code></pre>
+<div class="figure">
+<img src="./img/sticky-note-string.png" />
+
+</div>
+<p>Another few examples to see how strings work:</p>
+<pre><code>sign = &#39;capricorn&#39;
+numeral = &#39;one&#39;</code></pre>
+<ol start="18" style="list-style-type: decimal">
+<li><code>sign + numeral</code></li>
+<li><code>sign + ' ' + numeral</code></li>
+<li><code>sign * 4</code></li>
+<li><code>(sign + ' ' + numeral)*3</code></li>
+</ol>
+<h2 id="operators-expressions">Operators &amp; Expressions</h2>
+<p>We've danced around operators and simple expressions a lot up until now. Mostly we've just assumed that things work more or less like a calculator, and they do. Let's revisit the sort of exercise you carried out in the last lab, in which you typed a number of simple expressions using the basic Python operators.</p>
+<h3 id="addition-and-subtraction">Addition and Subtraction</h3>
+<pre><code>1 + 1
+-1 + 1
+15 - 1000
+1e5 + 1e6</code></pre>
+<h3 id="multiplication-and-division">Multiplication and Division</h3>
+<pre><code>6 / 8
+6.0 / 7.0
+-13 / 42.5
+7.5 / 1.25
+10 % 3</code></pre>
+<ol start="22" style="list-style-type: decimal">
+<li>What kind of error does Python give you when you enter <code>1 / 0</code>?</li>
+</ol>
+<p>While in mathematical typesetting, it is okay to write <span class="math"><em>a</em><em>b</em></span> for <span class="math"><em>a</em> × <em>b</em></span>, Python requires you to explicitly specify multiplication is occuring:</p>
+<pre><code>a = 12
+b = 4
+a b     # this will fail
+a * b   # this will succeed</code></pre>
+<p>Try these as well:</p>
+<pre><code>4(5(6))
+4(5*6)
+4*5*6
+4*(5*(6))</code></pre>
+<p>There are a few surprises lurking in Python as well. Consider:</p>
+<pre><code>5/4</code></pre>
+<p>This should surprise you. Try instead</p>
+<pre><code>5.0/4</code></pre>
+<p>What happens here is that if both numbers are integers, Python assumes (often wrongly) that you want an integer as an answer. In the latter case, we implicitly allow fractional parts (by specifying <code>.0</code> after the <code>5</code>), so Python &quot;promotes&quot; the answer to include a fractional part. <em>This will trip you up if you are not careful</em>—it is one of the most common bugs. (We'll talk more about the distinction between integers and floating-point numbers in the next lab.)</p>
+<h3 id="exponentiation">Exponentiation</h3>
+<pre><code>5 ** 2
+5 ** 3
+5 ** -2
+1 ** 1000</code></pre>
+<h3 id="comparisons">Comparisons</h3>
+<p>Comparison operators ask a question about the values—<em>e.g.</em>, <code>5 &gt; 3</code> is read as &quot;Is 5 greater than 3?&quot;, which is of course <code>True</code>.</p>
+<pre><code>q = 12
+r = 10
+s = 15</code></pre>
+<ol start="23" style="list-style-type: decimal">
+<li><code>q &lt; r</code></li>
+<li><code>r &lt; s</code></li>
+<li><code>s &gt; q</code></li>
+<li><code>q &lt;&gt; r</code> (This is the &quot;not equals&quot; operator, written mathematically as <span class="math"><em>q</em> ≠ <em>r</em></span>)</li>
+<li><code>q &lt;&gt; 12</code></li>
+</ol>
+<p>We will revisit the structure and uses of Python's logic in a later lab.</p>
+<h3 id="assignment-operators">Assignment Operators</h3>
+<p>We have frequently seen fit to use the equals sign <code>=</code> to express the idea of <em>assignment</em>—that is, to make the variable name on the left-hand side equal to the result of the expression on the right-hand side.</p>
+<pre><code>bodyTemperature = 98.6  #deg F
+cheese = &#39;brie&#39;
+mood = &#39;morose&#39;</code></pre>
+<p>A very common pattern is to need to add a value to a variable, and then to store the result of that addition as a new variable. Consider:</p>
+<pre><code>sum = 0
+value1 = 5
+value2 = 3
+value3 = 8
+sum = sum + value1  # the value of sum is now 5
+sum = sum + value2  # the value of sum is now 5 + 3 = 8
+sum = sum + value3  # the value of sum is now 8 + 8 = 16</code></pre>
+<p>Since this type of statement occurs a lot, Python has a shorthand way of writing the statement:</p>
+<pre><code>sum += value1</code></pre>
+<p>which is read out loud as &quot;<code>sum</code> is equal to the (prior) value of <code>sum</code> added to the value of <code>value1</code>&quot;. That's a mouthful, which is why we normally just say &quot;plus-equals&quot;. Most operators have an assignment form: <code>*=</code>, <code>/=</code>, and so forth.</p>
+<p>What is the value of the variable <code>charge</code> after each of the following code snippets? (Consider <code>charge</code> as being modified by each statement—that is, the value of <code>charge</code> in the second line is modified by executing the first line.)</p>
+<pre><code>charge = +2</code></pre>
+<ol start="28" style="list-style-type: decimal">
+<li><code>charge += 1</code></li>
+<li><code>charge -= 2</code></li>
+<li><code>charge *= -1</code></li>
+<li><code>charge /= 2</code></li>
+<li><code>charge **= 3</code></li>
+</ol>
+<p>Incidentally, we've also arrived at a common source of confusion for beginning programmers. If we consider the statement</p>
+<pre><code>x = x + 1</code></pre>
+<p><em>mathematically</em>, as an equation, then the statement simply does not hold true—there is no value of <code>x</code> which could make this statement true. But, if we regard the equals sign <code>=</code> in that expression not as saying &quot;is equal to&quot; but rather as saying &quot;is made equal to&quot;, we see that we are instructing Python to evaluate the right-hand expression (including the value of <code>x</code>) and then make the variable on the left-hand side of the equals sign point to that value. Thus, in Python you cannot have an expression on both sides of the equals sign, only on the right. The left-hand side <em>must</em> contain only a variable name.</p>
+<pre><code>a = 5 * 8.4         # okay
+a + 6 = 3.75 / 17   # not okay</code></pre>
+<p>Given <code>c</code> and <code>d</code> as below, answer whether each of the subsequent assignment statements are valid (answer 'yes' or 'no')?</p>
+<pre><code>c = -3
+d = 2</code></pre>
+<ol start="33" style="list-style-type: decimal">
+<li><code>c = 8 * 9</code></li>
+<li><code>d = c - 5</code></li>
+<li><code>c + d = 7</code></li>
+<li><code>c + 1 = c</code></li>
+<li><code>c = c + 1</code></li>
+</ol>
+<h3 id="compound-statements">Compound Statements</h3>
+<p>As in conventional mathematics, there is an order of operations: exponentiation occurs prior to multiplication and division, which in turn happen before addition and subtraction. Thus if you wish two values to be added together before they are divided by a third value, you must use parentheses to change the order of operations.</p>
+<p>For example, <span class="math">5 + 4 × 3 ≠ (5 + 4) × 3 → 17 ≠ 27</span>.</p>
+<ol start="38" style="list-style-type: decimal">
+<li><code>(5 + 4) * 3</code></li>
+<li><code>-(((-4*2)+7)-(12/21.5))</code></li>
+<li><code>16*(4e1 + 3e2)</code></li>
+<li><code>7.6 / (24 - 3)</code></li>
+</ol>
+<p>(Note that the judicious use of spaces can render these expressions more decipherable. Spaces are not necessary in expressions, but you should prioritize readability of all code you write.)</p>
+<h3 id="the-quadratic-formula">The Quadratic Formula</h3>
+<p>A classical example in algebra is the solution to the roots of a parabolic expression <span class="math"><em>a</em><em>x</em><sup>2</sup> + <em>b</em><em>x</em> + <em>c</em> = 0</span>. The quadratic formula which yields both roots (whether real or imaginary) is:</p>
+<p><br /><span class="math">$$x=\frac{-b\pm\sqrt{b^2-4ac\ }}{2a}$$</span><br /></p>
+<p>We will now consider (half of) the equation. In Python code, we may write this as</p>
+<pre><code>x = -b + (b**2 - 4*a*c)**0.5 / 2*a</code></pre>
+<p>Is this statement equivalent to the earlier mathematical statement? A test case is:</p>
+<pre><code>a = 5
+b = 2
+c = -3
+x = -b+(b**2-4*a*c)**0.5 / 2*a</code></pre>
+<p>The <em>correct</em> answer is <code>0.6</code> (seen from the plot). Our statement here yields <code>18.0</code>. The problem is that we haven't properly expressed the order of operations. (For instance, that multiplication and division happen prior to addition and multiplication.)</p>
+<div class="figure">
+<img src="./img/parabola.png" width="100%;"/>
+
+</div>
+<ol start="42" style="list-style-type: decimal">
+<li>Correct the statement above to properly represent the quadratic formula. This should only involve the addition of parentheses. Continue to test your expression against the known test solution until you get the correct answer, and then report that expression (<em>i.e.</em>, answer “<code>x = ...</code>”).</li>
+</ol>
+<h3 id="area-of-a-triangle">Area of a Triangle</h3>
+<p>Consider the formula for the area of a triangle <span class="math"><em>A</em></span> given its base <span class="math"><em>b</em></span> and height <span class="math"><em>h</em></span>:</p>
+<div class="figure">
+<img src="./img/area-triangle.png" width="33%;"/>
+
+</div>
+<p><br /><span class="math">$$A = \frac{b h}{2}$$</span><br /></p>
+<p>(We will assume meters for all units in this example.)</p>
+<p>We can write this in Python code thus:</p>
+<pre><code>base = 10
+height = 3
+area = base*height / 2</code></pre>
+<ol start="43" style="list-style-type: decimal">
+<li><p>What is the value of <code>area</code>?</p>
+<pre><code>base = 5
+height = 3
+area = base*height / 2</code></pre></li>
+<li>What is the value of <code>area</code>?</li>
+<li><p>What is the <em>correct</em> value of <span class="math"><em>A</em></span> in this case?</p></li>
+</ol>
+<p>Remember what we said earlier about <code>/</code> tripping you up in the case of <code>int</code>s? This is a good example of that sort of bug. We have a gap between our expectation of the statement's behavior and its actual behavior. A corrected version could be:</p>
+<pre><code>base = 7
+height = 5
+area = base*height / 2.0  # this forces the decimal part to be kept always</code></pre>
+<p>Another possibility:</p>
+<pre><code>base = 7
+height = 5
+area = float(base*height) / 2</code></pre>
+<p>While the notion of &quot;bug&quot; as &quot;something gone wrong&quot; is now culturally well known, it has a very specific meaning: a <em>bug</em> is a latent systematic error. These errors come from a mismatch between <em>what you think you coded</em> and <em>what you actually told the machine</em>. Thus they are often subtle and require some critical thought to fix.</p>
+<p>Now consider the statement to get the height <span class="math"><em>h</em></span> if the area <span class="math"><em>A</em></span> and the base <span class="math"><em>b</em></span> of a triangle are known.</p>
+<pre><code>base = 5
+area = 30
+height = area / 2 * base</code></pre>
+<ol start="46" style="list-style-type: decimal">
+<li>What is a corrected (working) version of this statement? (At least two changes are necessary. Work it out by hand if you need to.)</li>
+</ol>
+<h2 id="statements">Statements</h2>
+<p>We use the foregoing elements (literals, variables, operators, and expressions) rather like Legos to construct <em>statements</em>. Statements describe actions we wish the machine to take, which either alter its internal state (such as changing the value of a variable) or copy some portion of its internal state out for a human or other machine to use (such as <code>print</code>).</p>
+<p><em>Most</em> of the statements you have seen up until now are of the following form:</p>
+<pre><code>variable = some_other_variable * a_number</code></pre>
+<p>Lest you despair that the computational endeavor is merely an oversimple algebra class expressed in awkward terms, recall also statements like</p>
+<pre><code>print &#39;Who hath desired the Sea?&#39;
+help(max)
+pass</code></pre>
+<p>all of which are also expressions—commands to tell Python what to do. Even the occasional use of a module like <code>math</code> is a statement:</p>
+<pre><code>from cmath import pi
+print pi</code></pre>
+<ol start="47" style="list-style-type: decimal">
+<li><code>exp(pi*1j)</code> (numerical solution of <a href="https://en.wikipedia.org/wiki/Euler%27s_identity"><span class="math">$e^{\pi i}$</span></a>)</li>
+</ol>
+<p>As your exposure to Python grows in the next few weeks, so will your repertoire of expressions, allowing you to craft powerful and concise ways of solving problems.</p>
+<p>In short, Python distinguishes <em>expressions</em> as single bits of code which can be reduced to some kind of value (or collection of values), whereas <em>statements</em> make up lines of code (and thus overlapping with expressions as a subcategory)<sup>[<a href="https://stackoverflow.com/questions/4728073/what-is-the-difference-between-an-expression-and-a-statement-in-python">SO</a>]</sup>—and yes, they can extend over many lines. Once you start scripting more the difference will become gradually clearer.</p>
+<h2 id="in-conclusion">In Conclusion</h2>
+<ol start="48" style="list-style-type: decimal">
+<li>How long did this lab exercise take you to complete (in minutes)?</li>
+<li>Which questions, if any, were unclear?</li>
+<li>Cite any consultations or references required to complete your work.</li>
+</ol>
+<!-- A.M.D.G. -->
+</div>
+</body>
+</html>

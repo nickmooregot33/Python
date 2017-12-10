@@ -1,0 +1,254 @@
+<!doctype html>
+<html>
+<head>
+
+<meta charset="utf-8" />
+<title>CS 101—Lab 13</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="./css/style.css">
+
+<!-- Loading mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+    <style>
+      #math_center { text-align:center; width:100%; background-color:yellow; }
+    </style>
+</head>
+<body>
+<div class="container" id="notebook-container">
+<h2 id="matlab-image-processing">MATLAB Image Processing</h2>
+<p>Today you will carry out the primary assignment in MATLAB for the semester.  Since the EWS labs have as a default an older version of MATLAB, you should first load the newer version as follows:
+</p>
+<p>
+<pre>
+<code>module switch matlab matlab/R2014b
+matlab
+</code>
+</pre>
+</p>
+<p>In order to ease your transition back-and-forth between Python and MATLAB, we have written a <a href="./lab13-handout.pdf">handout</a> which covers the basics of translation. This handout covers many more examples than you have seen in CS 101, but should serve you well throughout your engineering education since both languages are in common currency at the University of Illinois.</p>
+<p>Additionally, if you need to download the supporting files for the lab (<em>i.e.</em>, your <code>lab13</code> directory is empty), please <a href="https://uofi.box.com/cs101-fa15-lab13">click here</a> to acquire them. Unzip the file contents into your <code>lab13</code> directory, <strong>not</strong> a daughter directory.</p>
+<h3 id="image-representation">Image Representation</h3>
+<p>One of the major benefits of using MATLAB is the <a href="https://www.mathworks.com/products/?s_tid=gn_ps">extensive library of professional toolkits</a> it supports. Today, we will look at how MATLAB represents image data and how we can use the Image Processing Toolkit to identify image features.</p>
+<p>There are <a href="https://en.wikipedia.org/wiki/Image_file_formats">many data file representations</a> of images. You are probably familiar with JPEGs, GIFs, PNGs, and TIFFs, as these are commonly used on the Web and by digital cameras. Generally speaking, these formats use compression methods to store &quot;more&quot; pixels than they appear to. For simplicity, we will consider only straightforward uncompressed images here, which is the internal representation used by interpreters like MATLAB or Python when you manipulate the images.</p>
+<p>An image file can be thought of as a data array, with one pixel per array element. MATLAB can produce a random <span class="math inline"><em>N</em> × <em>N</em></span> array using <code>rand</code>, which we then plot as an image:</p>
+<pre><code>X = rand(64);       % N = 64, a 64x64 array of random data points
+imshow(X)           % show the array as if it were an image</code></pre>
+<p>In this case, the value of each point in the array is considered to be a greyscale value. (If the values range from 0 to 1, then MATLAB considers the entire range of data to be from zero (black) to one (white). If the values range from 0–255, then MATLAB considers the entire range of data to be from zero (black) to 255 (white). Although these are the customary defaults, in any case MATLAB will assume that your minimum value is black and your maximum value is white unless you override the range setting.)</p>
+<ol style="list-style-type: decimal">
+<li><p>(1 pt) Load the file <code>zebra.jpg</code> as <code>zebra</code> using the <a href="https://www.mathworks.com/help/matlab/ref/imread.html"><code>imread</code></a> tool. You should carry out the following steps to understand the image data.</p>
+<ul>
+<li><p>Examine the dimensions using the workspace information pane.</p></li>
+<li><p>Double-click the variable name in the workspace panel. A spreadsheet of the array contents appears.</p></li>
+<li><p>If you use the MATLAB function <a href="https://www.mathworks.com/help/matlab/ref/max.html"><code>max</code></a> on a 2D array, <code>max</code> returns a vector containing the maximum value along each matrix row. How would you then get the overall <code>max</code> value? <strong>What is the overall maximum value in this array?</strong> (This should be your answer to this question.)</p></li>
+</ul></li>
+</ol>
+<h3 id="feature-detection-edge-detection">Feature Detection (Edge Detection)</h3>
+<p>Using only this information, we can detect features like the edges of objects automatically (if not perfectly). Your eye can detect the edge of an object using several pieces of information, like the parallax (difference in motion as you move your head), binocular vision (the use of both eyes to form a pseudo-3D impression), and the sharp difference in color or form across an edge. The machine has access (in the case of an image data array) to only the latter of these: sharp differences. Much as we could use the <em>gradient</em> in optimization problems, the gradient is also useful in image processing to show where changes are significant.</p>
+<p>A common algorithm to detect edges is the <a href="https://en.wikipedia.org/wiki/Sobel_operator">Sobel operator</a>. (You do <strong>not</strong> need to understand the details of this method, just its application.) MATLAB provides an <a href="https://www.mathworks.com/help/images/ref/edge.html"><code>edge</code></a> function which implements this method to find the magnitude of the gradient (rate of change) at each point; this easily gives you the major edges in the image.</p>
+<pre><code>% assuming that you have already loaded `zebra`
+zebra_edges = edge(zebra);
+imshow(zebra_edges)</code></pre>
+<div class="figure">
+<img src="./img/zebra.png" alt="" />
+
+</div>
+<p>Very frequently, the edge detection algorithm has some gaps in it where the gradient isn't as sharp (like in blurry images, near the edges of hair, etc.). Since we would like to do a little better than the default, we need to pass <code>edge</code> an argument which will lower the threshold (an argument it can't refuse—sorry!).</p>
+<pre><code>zebra_edges_redux = edge(zebra, 0.1);
+imshow(zebra_edges_redux)</code></pre>
+<p>This is a little better for detecting stripes, but much worse with regards to the amount of noise the method picks up from the background. This is generally true for feature detection algorithms—it's very difficult to filter noise effectively. Sometimes it's worth trying a different method, like <code>Canny</code> instead of <code>Sobel</code>:</p>
+<pre><code>zebra_edges_canny = edge(zebra, &#39;Canny&#39;);
+imshow(zebra_edges_canny)</code></pre>
+<p>MATLAB also has a few functions built in which automatically detect common features like straight lines or circles and ellipses. These use underlying transformations like the Sobel method to find these common structures.</p>
+<ol start="2" style="list-style-type: decimal">
+<li><p>(1 pt) Load the file <code>balls.jpg</code> as <code>balls</code>. Use the <a href="https://www.mathworks.com/help/images/ref/imfindcircles.html"><code>imfindcircles</code></a> function to detect circles with radii between 15 and 45 pixels:</p>
+<pre><code>[centers, radii] = imfindcircles(A,[15 45]);</code></pre>
+<p>Draw the circles using <a href="https://www.mathworks.com/help/images/ref/imfindcircles.html"><code>viscircles</code></a>:</p>
+<pre><code>viscircles(centers, radii, &#39;EdgeColor&#39;, &#39;b&#39;);</code></pre>
+<p>This missed quite a few circles, but you can tune the metric up or down as appropriate (at the risk of false positives; <code>0.85</code> is the default):</p>
+<pre><code>[centers, radii] = imfindcircles(A,[30 45], &#39;Sensitivity&#39;, 0.95);</code></pre>
+<p>Save this last figure as <code>figure_2.png</code>. (Make certain that you are saving as a <code>png</code> file, and not as a MATLAB <code>fig</code> file.) Answer this question with <code>figure_2.png</code>.</p></li>
+</ol>
+<!--
+balls = imread('balls.jpg');
+imshow(balls)
+%[centers, radii] = imfindcircles(balls,[30 45]);
+[centers, radii] = imfindcircles(balls,[30 45], 'Sensitivity', 0.95);
+viscircles(centers, radii); %, 'EdgeColor', 'b');
+-->
+<p>This gives you a quick feel for how these functions behave—now let's take a look at how color is represented.</p>
+<h3 id="representing-color-rgb">Representing Color (RGB)</h3>
+<p>As a child, you learned about the three primary colors, red, yellow, and blue; these are (approximately) the <a href="https://en.wikipedia.org/wiki/CMYK_color_model"><em>subtractive primaries</em></a>, which are really magenta, yellow, and cyan (like printer ink). Later on, you may have learned in a physics class about the inverse of these colors, the <a href="https://en.wikipedia.org/wiki/RGB_color_model"><em>additive primaries</em></a>, red, green, and blue. The additive primaries are of course what you see in tiny subpixel elements if you look very closely at a television screen or computer monitor. Basically (although the actual science of color is <em>much</em> more complex), you can use the additive primary colors together to build up any screen-representable color by gradually turning off or on each color in a pixel.</p>
+<table>
+<tbody>
+<tr class="odd">
+<td align="left"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/AdditiveColor.svg/240px-AdditiveColor.svg.png" alt="" /></td>
+<td align="left"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/SubtractiveColor.svg/240px-SubtractiveColor.svg.png" alt="" /></td>
+</tr>
+</tbody>
+</table>
+<p>We will examine the representation of color using the <span class="math inline"><em>R</em><em>G</em><em>B</em></span> scheme using Jacques-Louis David's <em>Napoleon Crossing the Alps</em>. When you load the full-color image <code>'napoleon.jpg'</code> as <code>napoleon</code> (do this now), you will immediately find a major difference from <code>zebra</code>: the array is <em>three-dimensional</em>. Double-clicking on it in the workspace pane opens a representation of the variable which you can scroll through to see the values of individual components. You should also display this image using <code>imshow</code>. (Incidentally, if you close these variable tabs after you're done with them, you can reclaim your screen real estate for the command window.)</p>
+<p>Now, let's try to separate out the separate color channels in <code>napoleon</code>. Each layer of the 3D array is a 2D array of values of the red (1), green(2), and blue (3) channels. So if you want to plot the relative intensity of red, for instance, all you need to do is plot the first channel by itself:</p>
+<pre><code>imshow(napoleon(:,:,1))</code></pre>
+<p>This is indeed the red channel, although of course by itself MATLAB interprets the data array as a black-and-white image.</p>
+<pre><code>figure()
+imshow(napoleon)
+title(&#39;Full-color RGB Napoleon&#39;)
+figure()
+imshow(napoleon(:,:,1))
+title(&#39;Red channel&#39;)
+figure()
+imshow(napoleon(:,:,2))
+title(&#39;Green channel&#39;)
+figure()
+imshow(napoleon(:,:,3))
+title(&#39;Blue channel&#39;)</code></pre>
+<p>The dissatisfying thing about this image is that the <span class="math inline"><em>R</em><em>G</em><em>B</em></span> channels aren't represented in their actual colors. If we wanted to do this, we would have to add another argument to the <code>imshow</code> command, a <em>color map</em> which tells MATLAB which colors to use for the higher values and the lower. A color map is a range of colors (like a rainbow or a grayscale gradient) which maps to a range of numbers. The lowest values in an array are represented by the lowest color in the color map, the second lowest values by the next-lowest color, etc.</p>
+<p>In this case, since the <span class="math inline"><em>R</em><em>G</em><em>B</em></span> channels are each separate, the creation of color maps is straightforward using <code>linspace</code>:</p>
+<pre><code>redmap = zeros(256,3);
+redmap(:,1) = linspace(0,1,256);
+greenmap = zeros(256,3);
+greenmap(:,2) = linspace(0,1,256);
+bluemap = zeros(256,3);
+bluemap(:,3) = linspace(0,1,256);</code></pre>
+<p>To use one of these, simply add the color map as the second argument to <code>imshow</code>:</p>
+<pre><code>imshow(napoleon(:,:,3), bluemap)</code></pre>
+<!--
+    figure()
+    imshow(napoleon)
+    title('Full-color RGB Napoleon')
+    figure()
+    imshow(napoleon(:,:,1), redmap)
+    title('Red channel')
+    figure()
+    imshow(napoleon(:,:,2), greenmap)
+    title('Green channel')
+    figure()
+    imshow(napoleon(:,:,3), bluemap)
+    title('Blue channel')
+-->
+<ol start="3" style="list-style-type: decimal">
+<li>(1 pt) Plot the <em>red</em> channel of <em>Napoleon Crossing the Alps</em> and save it as <code>figure_3.png</code>. Answer this question with <code>figure_3.png</code>.</li>
+</ol>
+<h3 id="representing-color-lab">Representing Color (<span class="math inline"><em>L</em><em>a</em><em>b</em></span>)</h3>
+<p>The red–green–blue color scheme is extremely common in computing due to its natural mapping to pixels, but clearly there are other ways to represent color: magenta–yellow–cyan, for instance, like printer ink. One useful scheme is the <a href="https://en.wikipedia.org/wiki/Lab_color_space"><em><span class="math inline"><em>L</em><em>a</em><em>b</em></span> color space</em></a>, which represents color using a luminosity channel <span class="math inline"><em>L</em></span> (basically the brightness) and two color channels <span class="math inline"><em>a</em></span> and <span class="math inline"><em>b</em></span> (which attempt to approximate how your eye pigments process color). You can think of the three color spaces this way:</p>
+<div class="figure">
+<img src="./img/color-spaces.png" alt="" />
+
+</div>
+<p>(although for <span class="math inline"><em>L</em><em>a</em><em>b</em></span> this is an approximation!—see the Wikipedia page if you'd like to know more)</p>
+<p>To convert an image from the <span class="math inline"><em>R</em><em>G</em><em>B</em></span> color space to <span class="math inline"><em>L</em><em>a</em><em>b</em></span>, MATLAB requires you to simplify define a transformation mapping <code>cform</code> and then apply it to the image:</p>
+<pre><code>wadi = imread(&#39;wadi-rum.png&#39;);
+cform = makecform(&#39;srgb2lab&#39;);
+wadi_lab = applycform(wadi,cform);</code></pre>
+<p>Now plot <code>wadi</code> to see a satellite image of the Wadi Rum desert in Jordan. Then plot <code>wadi_lab</code>. MATLAB of course assumes that you are plotting in <span class="math inline"><em>R</em><em>G</em><em>B</em></span>—it doesn't know any other way—so we need to help it out a bit so things don't look so weird.</p>
+<h3 id="converting-color-functions">Converting Color (Functions)</h3>
+<p>You will now compose a function to automatically convert an image from <span class="math inline"><em>R</em><em>G</em><em>B</em></span> color space to <span class="math inline"><em>L</em><em>a</em><em>b</em></span> color space, to be named <code>rgb2lab</code>.</p>
+<ol start="4" style="list-style-type: decimal">
+<li><p>(2 pts) Compose a function <code>rgb2lab</code> which accepts as a parameter an array <code>rgb</code> and returns an array <code>lab</code>. <code>lab</code> should represent the image <code>rgb</code> converted from $RGB color space to <span class="math inline"><em>L</em><em>a</em><em>b</em></span> color space according to the foregoing procedure.</p>
+<p>Recall that a quirk of MATLAB is that a function must be saved in a file with the same name as the function, and the return variables must be specified in the function definition. Save this function in the file <code>rgb2lab.m</code> and answer this question with <code>rgb2lab.m</code>.</p></li>
+<li><p>(1 pt) Plot the <span class="math inline"><em>L</em></span> channel of <code>wadi_lab</code>. Add a title of your NetID (<code>title('whatever_your_netid_is')</code>) and save the figure as <code>figure_5.png</code> (checking the file type!). The default color map is acceptable. Answer this question with <code>figure_5.png</code>.</p></li>
+<li><p>(1 pt) Plot the <span class="math inline"><em>a</em></span> channel of <code>wadi_lab</code> using the color map <code>amap</code>:</p>
+<pre><code>amap = zeros(256,3);
+amap(:,1) = linspace(0,1,256);
+amap(:,2) = linspace(1,0,256);</code></pre>
+<p>Add a title of your NetID. Save the figure as <code>figure_6.png</code>. Answer this question with <code>figure_6.png</code>.</p></li>
+<li><p>(1 pt) Plot the <span class="math inline"><em>b</em></span> channel of <code>wadi_lab</code> using the color map <code>bmap</code>:</p>
+<pre><code>bmap = zeros(256,3);
+bmap(:,1) = linspace(0,1,256);
+bmap(:,2) = linspace(0,1,256);
+bmap(:,3) = linspace(1,0,256);</code></pre>
+<p>Add a title of your NetID. Save the figure as <code>figure_7.png</code>. Answer this question with <code>figure_7.png</code>.</p></li>
+</ol>
+<h3 id="course-feedback-next-steps">Course Feedback &amp; Next Steps</h3>
+<p>Hi! I'm Neal Davis, and I've written the labs this semester. It's been a bit bumpy but I think we're getting the hang of pacing them, and I'm grateful for your patience as we tweak things in CS 101 this semester. (It's odd, I know, to introduce myself at the end, but at the beginning didn't seem to work, one thing led to another, and here we are today.)</p>
+<p>Although the lab is now over, we need to collect the course feedback for me so you should stick around until the end today. I realize that you haven't had much if any interaction with me, but the two ICES feedback forms you will fill out today assess me as well as your TA. If you can't answer something, just leave it <code>N/A</code> and we'll take into account the somewhat unusual relationship you and I have via the labs like this.</p>
+<p>I'm an engineer like you (nuclear), so I know that a lot of CS material may seem esoteric to you. But I'd also like to fill you in a little on where you should go next if you are interested in the computational processes underlying the projects in CS 101 in a way accessible to engineers.</p>
+<p>The main courses which cover computation in detail are:</p>
+<ul>
+<li>CS 225—Data Structures</li>
+<li>CS 357—Numerical Methods</li>
+<li>CS 450—Numerical Analysis</li>
+<li>TAM 470—Computational Mechanics</li>
+</ul>
+<p>You should also consider minoring in either <a href="http://cse.illinois.edu/students/undergraduate-program/cse-undergraduate-minor/undergrad-minor-requirements">Computational Science and Engineering</a> or <a href="http://cs.illinois.edu/prospective-students/undergraduates/cs-degrees-offered/cs-minor">Computer Science</a>. CSE probably overlaps more with your major courses than CS, and focuses more on enabling you to effectively carry out computational research in grad school or industry. CS leads you into more advanced concepts—data structures, application interfaces, etc.</p>
+<p>You've learnt Python and a bit of MATLAB this semester, so I'd like to also introduce you to the other languages you should consider learning at some point:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Language</th>
+<th align="left">where useful</th>
+<th align="left">where to learn at UIUC</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">C</td>
+<td align="left">All majors</td>
+<td align="left">ECE 220</td>
+</tr>
+<tr class="even">
+<td align="left">C++</td>
+<td align="left">All majors</td>
+<td align="left">CS 225</td>
+</tr>
+<tr class="odd">
+<td align="left">Fortran</td>
+<td align="left">Aerospace, physics, nuclear</td>
+<td align="left">—</td>
+</tr>
+<tr class="even">
+<td align="left">Java</td>
+<td align="left">All majors</td>
+<td align="left">CS 125</td>
+</tr>
+<tr class="odd">
+<td align="left">MATLAB</td>
+<td align="left">All majors</td>
+<td align="left">CS 101, <a href="https://cse.illinois.edu/training/">CSE workshops</a></td>
+</tr>
+<tr class="even">
+<td align="left">Mathematica</td>
+<td align="left">Mathematics, TAM</td>
+<td align="left"><a href="https://cse.illinois.edu/training/">CSE workshops</a>, a few other classes</td>
+</tr>
+<tr class="odd">
+<td align="left">Python</td>
+<td align="left">All majors</td>
+<td align="left">CS 101, <a href="https://cse.illinois.edu/training/">CSE workshops</a></td>
+</tr>
+<tr class="even">
+<td align="left">R</td>
+<td align="left">Bioengineering, statistics, data analytics</td>
+<td align="left">several courses in Stat, ISE</td>
+</tr>
+</tbody>
+</table>
+<!-- A.M.D.G. -->
+</div>
+</body>
+</html>

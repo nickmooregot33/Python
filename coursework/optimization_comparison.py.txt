@@ -1,0 +1,100 @@
+import itertools,random
+import numpy as np
+
+# Function to compute the value of a set of items
+# The function we want to optimize
+def f(x,w,v):
+	total_weight=0
+	total_value=0
+	for i in x:
+		total_weight+=w[i]
+		total_value+=v[i]
+	if total_weight>=50:
+		return 0
+	else:
+		return total_value
+
+#Brute force optimization
+n=18
+items=range(n)
+weights=np.random.rand(n)*50
+values=np.random.rand(n)*100
+print weights
+print values
+
+best_items=None
+best_value=0.0
+for i in range(n):
+	for x in itertools.combinations(items,i):
+		v=f(x,weights,values)
+		if v>best_value:
+			best_value=v
+			best_items=x
+print ""
+print "Brute force search:"
+print best_items
+print best_value
+
+# Random sample optimization
+samples=10000
+best_items=None
+best_value=0.0
+for i in range(samples):
+	bool(random.getrandbits(1))
+	x=[j for j in xrange(n) if random.getrandbits(1)]
+	v=f(x,weights,values)
+	if v>best_value:
+		best_value=v
+		best_items=x
+print ''
+print "Random sample:"
+print best_items
+print best_value
+
+# Greedy optimization
+perunit=[0] * n
+for i in range(n):
+	perunit[i]=(values[i]/weights[i],i)
+perunit.sort()
+perunit.reverse()
+
+best_items=[]
+weight=0.0
+best_value=0.0
+for i in range(n):
+	item=perunit[i][1]
+	#check to see if adding the next item would add too much weight
+	if weight+weights[item]>=50:
+		break
+	best_items.append(item)
+	best_value+=values[item]
+	weight+=weights[item]
+best_items.sort()
+print ''
+print "Greedy:"
+print best_items
+print best_value
+
+# Hill climbing optimization
+best_items=[]
+best_value=0 #f(x,weights,values)
+improved=True
+while improved:
+	improved=False
+	for j in range(n):
+		x=best_items[:]
+		if j in x:
+			index=x.index(j)
+			del x[index]
+		else:
+			x.append(j)
+		v=f(x,weights,values)
+		if v>best_value:
+			best_value=v
+			best_items=x[:]
+			improved=True
+			break
+print ''
+print "Hill Climbing"
+print best_items
+print best_value

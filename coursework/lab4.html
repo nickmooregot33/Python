@@ -1,0 +1,334 @@
+<!doctype html>
+<html>
+<head>
+
+<meta charset="utf-8" />
+<title>CS 101—Lab 4</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="./css/style.css">
+
+<!-- Loading mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+</head>
+<body>
+<div class="container" id="notebook-container">
+<h1 id="conditionals-control">Conditionals &amp; Control</h1>
+<!-- tags:  if, elif, conditionals, logic, boolean, comparison -->
+<blockquote>
+<p>︎❖ <em>Objectives</em>:</p>
+<ol style="list-style-type: decimal">
+<li><p>Use functions effectively (with arguments, comments, and scripting).</p></li>
+<li><p>Understand Python's binary logic system (<code>True</code> and <code>False</code>).</p></li>
+<li>Exploit conditional statements to build adaptive programs.</li>
+</ol>
+</blockquote>
+<ul>
+<li>Write your NetID at the top of a new blank text file and save it as <code>lab4.txt</code> in the <code>Desktop/lab4</code> directory. There should be no spaces or capitalization in the file name: <code>lab4.txt</code>. The autograder has a hard time with misnamed files, so please hew to this standard.</li>
+</ul>
+<h2 id="functions-redux">Functions Redux</h2>
+<p>Let's do a little bit more with functions to get more comfortable with their applications. Before, we would write tricky bits of useful code like the variable swap</p>
+<pre><code>i = 1
+j = 2
+i,j = j,i
+print &#39;i = &#39;%i
+print &#39;j = &#39;%j</code></pre>
+<p>Now we can write pieces like this <em>once</em> and store them as a function:</p>
+<pre><code>def swap(var1, var2):
+    return var2,var1
+
+i = 1
+j = 2
+i,j = swap(i,j)
+print &#39;i = &#39;%i
+print &#39;j = &#39;%j</code></pre>
+<p>This still doesn't look like much of a gain, but imagine performing more complicated tasks like permuting a set of variables (which is useful in tensor algebra, for instance<sup>[<a href="http://mathworld.wolfram.com/Tensor.html">MathWorld</a>]</sup>):</p>
+<div class="figure">
+<img src="./img/permute.png" />
+
+</div>
+<ol start="1" style="list-style-type: decimal">
+<li><p>Write a function <code>permute</code> which carries out this operation. (It really doesn't need to be more complicated than the <code>swap</code> function above, just with more variables.) Save it as <code>permute.py</code> in the <code>lab4</code> directory and answer this question with <code>permute.py</code>.</p>
+<p>You can use this code to test your function:</p>
+<pre><code># set up the variables
+i,j,k,l,m = 1,2,4,8,16
+
+# test the permutation
+if (m,i,j,k,l) == permute(i,j,k,l,m):
+    print &#39;Great!&#39;</code></pre></li>
+</ol>
+<h3 id="optional-parameters">Optional Parameters</h3>
+<p>You can even assign default values. Consider a function which integrates to some level of precision, or <em>tolerance</em>. While it is good for the user to be able to specify when a very high tolerance is necessary (like <span class="math">10<sup> − 6</sup></span>), for most purposes it may be simpler to just have a default that is left unspecified.</p>
+<pre><code>def evaluate(x, tol=1e-3):
+    ... internal logic here ...
+    return result</code></pre>
+<p>In this case, <code>tol</code> defaults to <code>1e-3</code> <em>unless</em> the user specifies <code>tol</code>. The following are all valid calls to <code>evaluate</code> (but won't work for you to type since we didn't fill in the logic for <code>evaluate</code>):</p>
+<pre><code>val = 5.0
+a = evaluate(val)
+b = evaluate(val, 1e-5)
+c = evaluate(val, tol=1e-6)</code></pre>
+<p>This arrangement is very common in libraries like <code>scipy</code> in which functions can have many parameters. Consider the definition of the function <code>quad</code> which integrates a function:</p>
+<pre><code>scipy.integrate.quad(func, a, b, args=(), full_output=0, epsabs=1.49e-08, epsrel=1.49e-08, limit=50, points=None, weight=None, wvar=None, wopts=None, maxp1=50, limlst=50)</code></pre>
+<p>The first three parameters (with no defaults) <code>func</code>, <code>a</code>, and <code>b</code>, are required; all of the others have default values but can be overridden if the user wishes to do something specific with the calculation.</p>
+<p>Let's revisit the <code>warn</code> function from last week. We defined and used it as follows:</p>
+<pre><code>def warn(msg):
+    print &#39;WARNING:  &#39;, msg
+
+warn(&#39;Keyboard not responding. Press any key to continue.&#39;)</code></pre>
+<p>What if we want a default message in case we encounter a scenario without a good specific warning? (This isn't a great idea, by the way—you should be as specific as possible—but it <em>is</em> illustrative.)</p>
+<pre><code>def warn(msg=&#39;Unknown error&#39;):
+    print &#39;WARNING:  &#39;, msg</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li><p><code>warn()</code> (<strong>N.B.</strong>: There has been some confusion about answering questions like this. In these cases, simply execute the line of code and then copy the result from Python and paste it as your answer.)</p></li>
+<li><p>Write a function <code>my_func</code> which accepts two parameters, <code>x</code> and <code>b</code>. <code>b</code> should supply a default value of <code>1.0</code> if it is not given as an argument. The function should return the result <span class="math"><em>x</em><sup> − <em>b</em></sup></span>.</p>
+<p>As a test, <code>my_func(3.0) == 0.3333333333333333</code> and <code>my_func(3.0,3) == 0.037037037037037035</code>. Save this function in a separate file as <code>my_func.py</code> and answer this question with <code>my_func.py</code>.</p></li>
+</ol>
+<h2 id="binary-logic-comparison-operators">Binary Logic &amp; Comparison Operators</h2>
+<p>Mathematically, when you wish to express whether or not two things are greater than, less than, or equal to each other, you write statements along the lines of <br /><span class="math">$$a &gt; 5; b &lt; 3; x = \frac{\pi}{3}; b \leq 10; a \neq b \text{.}$$</span><br /></p>
+<p>In the Python language, things are much the same. The previous statements could be expressed thus:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left"><span class="math">Mathematics</span></th>
+<th align="left"><code>Python</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><span class="math"><em>a</em> &gt; 5</span></td>
+<td align="left"><code>a &gt; 5</code></td>
+</tr>
+<tr class="even">
+<td align="left"><span class="math"><em>b</em> &lt; 3</span></td>
+<td align="left"><code>b &lt; 3</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><span class="math">$x = \frac{\pi}{3}$</span></td>
+<td align="left"><code>x == pi/3</code></td>
+</tr>
+<tr class="even">
+<td align="left"><span class="math"><em>b</em> ≤ 10</span></td>
+<td align="left"><code>b &lt;= 10</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><span class="math"><em>a</em> ≠ <em>b</em></span></td>
+<td align="left"><code>a &lt;&gt; b</code></td>
+</tr>
+</tbody>
+</table>
+<p>If you define the variables in our example, you can try them out. Python answers tersely with <code>True</code> or <code>False</code>. These are know as the <em>Boolean</em> or <em>binary</em> types, and arise as the result of comparisons.</p>
+<p>Comparisons can be <em>chained</em> together using <code>and</code> and <code>or</code>. We won't delve deeply into the mysteries of binary logic, but this construction is useful when several conditions must be met. To enforce <em>both</em> conditions of the first two lines of the above table, write</p>
+<pre><code>a &gt; 5 and b &lt; 3</code></pre>
+<p>To enforce <em>either</em> one or <em>both</em>, write</p>
+<pre><code>a &gt; 5 or b &lt; 3</code></pre>
+<p>A random opening of my textbook on heat and mass transfer suggests as an example the piecewise function describing convective heat transfer away from a hot plate<sup>[<a href="#Incropera2002">Incropera2002, p. 557</a>]</sup>:</p>
+<p><br /><span class="math">$$
+h = 
+\left\{
+\begin{array}{lr}
+0.54 Lk Ra_{\text{L}}^{1/4} &amp; 10^4 \leq Ra_{\text{L}} \leq 10^7 \\
+0.15 Lk Ra_{\text{L}}^{1/3} &amp; 10^7 \leq Ra_{\text{L}} \leq 10^{11}
+\end{array}
+\right.
+$$</span><br /></p>
+<p>where <span class="math"><em>h</em></span> is the convective heat transfer coefficient, <span class="math"><em>L</em></span> is the length of the plate, etc. (Heat transfer is full of a lot of wonky correlations and compound definitions like this.)</p>
+<p>You could write each of the right-hand-side comparisons as follows:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left"><span class="math">Mathematics</span></th>
+<th align="left"><code>Python</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><span class="math">10<sup>4</sup> ≤ <em>R</em><em>a</em><sub>L</sub> ≤ 10<sup>7</sup></span></td>
+<td align="left"><code>Ra_L &gt; 1e4 and Ra_L &lt; 1e7</code></td>
+</tr>
+<tr class="even">
+<td align="left"><span class="math">10<sup>7</sup> ≤ <em>R</em><em>a</em><sub>L</sub> ≤ 10<sup>11</sup></span></td>
+<td align="left"><code>Ra_L &gt; 1e7 and Ra_L &lt; 1e11</code></td>
+</tr>
+</tbody>
+</table>
+<pre><code>d = 45.0
+r = 7.64e-3
+x = 3.022</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Write the Python equivalent of the mathematical comparison <span class="math"><em>r</em> &lt; <em>x</em> ≤ <em>d</em></span> in a single compound expression.</li>
+</ol>
+<p>Another way of comparing things is to find out if one thing is <code>in</code> another. The <code>in</code> statement has a simple syntax:</p>
+<ol start="5" style="list-style-type: decimal">
+<li><code>'a' in 'jackalope'</code></li>
+<li><code>'r' in 'jackalope'</code></li>
+</ol>
+<p>We will use <code>in</code> frequently with <code>list</code>s and other sophisticated data types later on.</p>
+<pre><code>If = &#39;If you can meet with Triumph and Disaster/And treat those two impostors just the same.&#39;</code></pre>
+<ol start="7" style="list-style-type: decimal">
+<li>Write a single expression which tests whether or not the string <code>'Rudyard'</code> is found within <code>If</code>.</li>
+</ol>
+<pre><code>filename = &#39;labresults-2015-09-21_10_45-ab.dat&#39;</code></pre>
+<ol start="8" style="list-style-type: decimal">
+<li>Write a single expression which tests whether or not the string <code>'.dat'</code> is found within <code>filename</code>.</li>
+</ol>
+<p>Finally, sometimes you just want to make sure something is <code>not</code> the case:</p>
+<pre><code>acceptableFileTypes = &#39;txt,csv,xls,dat,cfg&#39;
+&#39;doc&#39; not in acceptableFileTypes</code></pre>
+<h2 id="conditional-statements-branched-control">Conditional Statements &amp; Branched Control</h2>
+<p>Last week you wrote a <span class="math">sinc</span> calculation function that included a single statement to deal with an edge case where a division by zero could occur.</p>
+<p><br /><span class="math">$$\text{sinc}(x) = \frac{\sin(x)}{x}$$</span><br /></p>
+<pre><code>def sinc(x):
+    if x == 0:
+        return 1.0  # safeguard against ZeroDivisionError
+    y = sin(x) / x
+    return y
+
+sinc(0)</code></pre>
+<p>Essentially, the calculation of <span class="math">sinc</span> at any point falls into one of two categories: either the calculation has a simple division by a real number or the taking of a limit is involved. Since we already know the answer in all cases, we forgo the limit and simply <code>return 1.0</code> in this case.</p>
+<p>Conditional logic let you deal with both <em>branches</em> of control. There are two possible routes the program could take, like a river that splits around an island and then flows together again afterward.</p>
+<p>Take, for instance, the definition of the absolute value:</p>
+<p><br /><span class="math">$$
+\text{abs}(x) =
+|x| =
+\left\{
+\begin{array}{lr}
+-x &amp; : x &lt; 0 \\
+x &amp; : x \geq 0
+\end{array}
+\right.
+$$</span><br /></p>
+<p>Depending on the value of <span class="math"><em>x</em></span>, a different definition applies when evaluating the function <span class="math">abs</span>.</p>
+<p>It is worth noting that a few values other than <code>False</code> also evaluate as logically false: <code>None</code> and <code>0</code>. (<code>None</code> is a sort of null-value catch-all in Python.) For instance, a function which opens a file may return either the contents of the file (if successful) or <code>None</code> if no file was opened.</p>
+<pre><code>def open_file(filename):
+    ... logic to open file ...
+    if not file:
+        return None
+    else:
+        return file</code></pre>
+<h3 id="application-polygon-areas">Application: Polygon Areas</h3>
+<p>The area of a regular polygon is given by the formula</p>
+<p><br /><span class="math">$$A = \frac{1}{2} a n s$$</span><br /></p>
+<p>where <span class="math"><em>a</em></span> is the apothem, or the radius of an inscribed circle, <span class="math"><em>n</em></span> is the number of sides, and <span class="math"><em>s</em></span> is the length of a side. A geometric relationship between the <span class="math"><em>a</em></span>, <span class="math"><em>s</em></span>, and <span class="math"><em>n</em></span> is</p>
+<p><br /><span class="math">$$a = \frac{s}{2 tan(\pi / n)}$$</span><br /></p>
+<p>Together, we can use these facts to write an area calculation function with two inputs: the number of sides and the length of a side. A function <code>tan</code> is available in the module <code>math</code>, as well as the constant <code>pi</code>.</p>
+<ol start="9" style="list-style-type: decimal">
+<li>Compose a function <code>area_polygon</code> which calculates the area of a regular polygon given the number of sides <code>n</code> and the length of a side <code>s</code> (with a default value of <code>1.0</code> for <code>s</code>). (It should <code>return 0.0</code> if <code>n &lt;= 2</code>.) Save it in a file <code>polygon.py</code> in the folder <code>lab4</code> and answer this question with <code>polygon.py</code>.  Any necessary <code>import</code> statements should be included in that file.</li>
+</ol>
+<p>You may test your function with the following (which should all evaluate to <code>True</code>):</p>
+<pre><code>area_polygon(3) == 0.43301270189221946
+area_polygon(7) == 3.6339124440015893
+area_polygon(2) == 0.0</code></pre>
+<h3 id="application-chemical-names">Application: Chemical Names</h3>
+<p>You will now write a function which accepts as input a chemical element symbol and returns the corresponding name of the element. We will do this using a set of <code>if</code> and <code>elif</code> statements, although there is a more efficient way to do this (which requires the <code>dict</code>ionary you'll see in a couple of weeks).</p>
+<p>A short version of this function could look like this:</p>
+<pre><code>def symbol_to_name(symbol):
+    if &#39;H&#39; in symbol:
+        return &#39;Hydrogen&#39;
+    elif &#39;He&#39; in symbol:
+        return &#39;Helium&#39;</code></pre>
+<p>but already there's a subtle failure mode. Try using <code>He</code> and see what happens.</p>
+<p>The 'H' case picks up on the 'H' in 'He' first, and the second conditional statement is never executed. This means that you have to nest conditionals inside of each other. A corrected version of that code is:</p>
+<pre><code>def symbol_to_name(symbol):
+    if &#39;H&#39; in symbol:
+        if &#39;He&#39; in symbol:
+            return &#39;Helium&#39;
+        else:
+            return &#39;Hydrogen&#39;</code></pre>
+<p>which can be expanded a bit more:</p>
+<pre><code>def symbol_to_name(symbol):
+    if &#39;H&#39; in symbol:
+        if &#39;He&#39; in symbol:
+            return &#39;Helium&#39;
+        else:
+            return &#39;Hydrogen&#39;
+    elif &#39;B&#39; in symbol:
+        return &#39;Boron&#39;</code></pre>
+<p>and so on.</p>
+<ol start="10" style="list-style-type: decimal">
+<li>Expand the function <code>symbol_to_name</code> to correctly handle the following table of symbols. Add a terminal <code>else</code> statement to return <code>None</code> if a symbol is given which doesn't match this table. Save it as <code>symbols.py</code> in the folder <code>lab4</code> and answer this question with <code>symbols.py</code>.</li>
+</ol>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Symbol</th>
+<th align="left">Name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">H</td>
+<td align="left">Hydrogen</td>
+</tr>
+<tr class="even">
+<td align="left">He</td>
+<td align="left">Helium</td>
+</tr>
+<tr class="odd">
+<td align="left">Li</td>
+<td align="left">Lithium</td>
+</tr>
+<tr class="even">
+<td align="left">Be</td>
+<td align="left">Beryllium</td>
+</tr>
+<tr class="odd">
+<td align="left">B</td>
+<td align="left">Boron</td>
+</tr>
+<tr class="even">
+<td align="left">C</td>
+<td align="left">Carbon</td>
+</tr>
+<tr class="odd">
+<td align="left">N</td>
+<td align="left">Nitrogen</td>
+</tr>
+<tr class="even">
+<td align="left">O</td>
+<td align="left">Oxygen</td>
+</tr>
+</tbody>
+</table>
+<p>You may test your function with the following (which should all evaluate to <code>True</code>):</p>
+<pre><code>symbol_to_name(&#39;He&#39;) == &#39;Helium&#39;
+symbol_to_name(&#39;Be&#39;) &lt;&gt; &#39;Boron&#39;
+symbol_to_name(&#39;He&#39;) &lt;&gt; &#39;Hydrogen&#39;
+symbol_to_name(&#39;B&#39;) &lt;&gt; &#39;Beryllium&#39;
+symbol_to_name(&#39;N&#39;) == &#39;Nitrogen&#39;
+symbol_to_name(&#39;Ne&#39;) == None</code></pre>
+<h2 id="in-conclusion">In Conclusion</h2>
+<ol start="11" style="list-style-type: decimal">
+<li>How long did this lab exercise take you to complete (in minutes)?</li>
+<li>Cite any consultations or references required to complete your work. (But please include this number in your file even if blank!)</li>
+</ol>
+<p>Save your file and submit it. <strong>Make sure that all of the expected script files are listed as submitted by <code>submit101</code> and that they have been properly named (lowercase, no spaces). You can lose points for not following these instructions.</strong></p>
+<h2 id="reference">Reference</h2>
+<p><a id="Incropera2002">Incropera2002</a>: Incropera and DeWitt, <em>Fundamentals of Heat and Mass Transfer</em>. Wiley, 2002.</p>
+<!-- A.M.D.G. -->
+</div>
+</body>
+</html>

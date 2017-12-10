@@ -1,0 +1,493 @@
+<!doctype html>
+<html>
+<head>
+
+<meta charset="utf-8" />
+<title>CS 101—Lab 3</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="./css/style.css">
+
+<!-- Loading mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+</head>
+<body>
+<div class="container" id="notebook-container">
+<h1 id="data-types-functions-scope">Data Types, Functions, &amp; Scope</h1>
+<!-- tags:  type, function, def, scope, indentation -->
+<blockquote>
+<p>︎❖ <em>Objectives</em>:</p>
+<ol style="list-style-type: decimal">
+<li><p>Understand distinctions in Python's type system.</p></li>
+<li><p>Use indexing to access components of a data structure.</p></li>
+<li><p>Explain the use and composition of functions.</p></li>
+<li><p>Utilize the built-in library of Python functions effectively.</p></li>
+<li>Explain blocks and variable scope and understand how it impacts variable use.</li>
+</ol>
+</blockquote>
+<ul>
+<li>Write your NetID at the top of a new blank text file and save it as <code>lab3.txt</code> in the <code>Desktop/lab3</code> directory. Make sure that you number each answer on a new line—several people have submitted labs without line numbers. Or worse, they've submitted without saving their text file first, making the text file empty.</li>
+</ul>
+<h2 id="data-types">Data Types</h2>
+<blockquote>
+<p>︎❖ <em>Objectives</em>:</p>
+<ol style="list-style-type: decimal">
+<li><p>Understand distinctions in Python's type system.</p></li>
+<li>Use indexing to access components of a data structure.</li>
+</ol>
+</blockquote>
+<h3 id="numbers">Numbers</h3>
+<p>We covered numeric types last time; a brief refresher: integers are the positive and negative whole numbers, <br /><span class="math">...,  − 5,  − 4,  − 3,  − 2,  − 1, 0,  + 1,  + 2,  + 3,  + 4,  + 5, ...</span><br /></p>
+<p>and floating-point numbers are the numbers that carry a fractional part.</p>
+<p>You can determine the <em>type</em> of a number by using the intuitively-named <code>type</code> function:</p>
+<pre><code>type(1)
+type(1.)    # Again, note that `1` is an `int` while `1.` is a `float`.
+type(1.0)
+type(-1)
+type(0.)
+type(1.564e15)</code></pre>
+<p>The result of an <code>int</code> plus a <code>float</code> is <em>promoted</em> to be a <code>float</code>:</p>
+<pre><code>type(1e5+1)</code></pre>
+<p>Functions sometimes change the type of a number even if the result could be represented as the original type (often because intermediate steps in the calculation use <code>float</code>s):</p>
+<pre><code>from math import exp
+exp(0)</code></pre>
+<p>and sometimes they do not:</p>
+<ol start="1" style="list-style-type: decimal">
+<li><code>type(abs(-1))</code></li>
+<li><code>type(abs(-1.))</code></li>
+</ol>
+<p>Python even supports a handful of special values, such as infinity <span class="math">∞</span>. You won't need these for CS 101, but they may come in useful later.</p>
+<ol start="3" style="list-style-type: decimal">
+<li><code>float('Inf')</code> (It's a little cumbersome to use, though.)</li>
+</ol>
+<h3 id="strings">Strings</h3>
+<p>The fundamental text data type, the <em>string</em>, has already shown up in a few places:</p>
+<pre><code>print &quot;I saw this morning morning&#39;s minion&quot;</code></pre>
+<p>In order to distinguish the human-readable message from the machine command <code>print</code>, we surrounded the string with some set of quotes. <em>Indexing</em> refers to the selection of a single letter in a string. We do this by placing a bracketed number after a string variable:</p>
+<pre><code>message = &quot;Sixty zippers were quickly picked from the woven jute bag.&quot;
+message[3]</code></pre>
+<p>Remember why <code>message[3]</code> returns not <code>'x'</code> but <code>'t'</code>. Typically we would consider <code>'t'</code> to be the <em>fourth</em> element of the string, but many programming languages—including Python—instead start counting at zero. In this model, the string <code>message</code> is indexed as follows:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">index</th>
+<th align="left">0</th>
+<th align="left">1</th>
+<th align="left">2</th>
+<th align="left">3</th>
+<th align="left">4</th>
+<th align="left">5</th>
+<th align="left">6</th>
+<th align="left">7</th>
+<th align="left">8</th>
+<th align="left">...</th>
+<th align="left">54</th>
+<th align="left">55</th>
+<th align="left">56</th>
+<th align="left">57</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">letter</td>
+<td align="left">S</td>
+<td align="left">i</td>
+<td align="left">x</td>
+<td align="left">t</td>
+<td align="left">y</td>
+<td align="left"></td>
+<td align="left">z</td>
+<td align="left">i</td>
+<td align="left"></td>
+<td align="left">...</td>
+<td align="left">b</td>
+<td align="left">a</td>
+<td align="left">g</td>
+<td align="left">.</td>
+</tr>
+</tbody>
+</table>
+<p>Aside from starting with zero, indexing is pretty straightforward.</p>
+<ol start="4" style="list-style-type: decimal">
+<li><code>message[25]</code></li>
+<li><code>message[60]</code> (Answer with the last line of the resulting error message, <em>i.e.</em>, <code>IndexError: string...</code>.)</li>
+</ol>
+<blockquote>
+<p>☞<em>Aside</em>: Programming languages that count from zero are referred to as <em>zero-indexed</em>, while those that start from one are <em>one-indexed</em>. The rationale for zero-indexing is that what is actually counted is the <em>offset</em> from the beginning of the string—thus <code>'i'</code> is <em>one</em> away from the beginning, <code>'x'</code> is <em>two</em> away, etc. Languages that are &quot;related&quot; to the <a href="https://en.wikipedia.org/wiki/C_(programming_language)">C language</a> generally adopt this convention.</p>
+<p>One argument for one-indexing is that humans (and mathematicians) count from one &quot;naturally&quot;. Languages related to the <a href="https://en.wikipedia.org/wiki/Fortran">Fortran language</a> often use one-indexing.</p>
+If you'd like to overthink this, please refer to <a href="https://programmers.stackexchange.com/questions/110804/why-are-zero-based-arrays-the-norm">this Q&amp;A at Stack Overflow</a>.
+</blockquote>
+<p>Regular indexing is a fairly natural process for us: it's just counting off with whole numbers. What happens if you use a <em>negative</em> index?</p>
+<ol start="6" style="list-style-type: decimal">
+<li><code>message[-1]</code></li>
+</ol>
+<p>Negative indexing <em>counts down</em> from the end of the string. This is very convenient and saves you the trouble of figuring out the length of the string and then subtracting from that.</p>
+<pre><code>message[-2]
+message[-15]</code></pre>
+<p>You can always probe the limits of sanity, though:</p>
+<pre><code>message[8.5]</code></pre>
+<p>Now we can generalize our notion of <em>indexing</em> to <em>slicing</em>. Slicing means using a <em>range of indices</em> to take a <em>slice</em> of a string. A range is written <code>string[left:right]</code>, where the <code>left</code> index is part of the string but the <code>right</code> index is not. (We call this a <em>half-open</em> range.)</p>
+<pre><code>pangram = &#39;Sphinx of black quartz: judge my vow.&#39;</code></pre>
+<ol start="7" style="list-style-type: decimal">
+<li><code>pangram[0:5]</code></li>
+<li><code>pangram[6:13]</code></li>
+<li><code>pangram[0:0]</code> (Note that the right-hand index is not in the range, so this string is empty.)</li>
+<li><code>pangram[0:-1]</code></li>
+<li><code>pangram[5:]</code> (We don't have to specify both sides; if we don't, Python assumes we are going all the way to the end or coming all the way from the beginning.)</li>
+<li><code>pangram[:10]</code></li>
+<li><code>pangram[:]</code> (Thus this is just a copy of the entire original string.)</li>
+</ol>
+<p>Although strings <em>are</em> important and useful, you're still fairly limited in what you're able to do with them. But many aspects of indexing will carry over to other data types like <code>list</code>s and <code>ndarray</code>s (<span class="math"><em>n</em></span>-dimensional arrays), meaning that you will be able to use these techniques to manipulate large arrays of numerical data as well.</p>
+<h2 id="functions">Functions</h2>
+<blockquote>
+<p>︎❖ <em>Objectives</em>:</p>
+<ol style="list-style-type: decimal">
+<li><p>Explain the use and composition of functions.</p></li>
+<li>Utilize the built-in library of Python functions effectively.</li>
+</ol>
+</blockquote>
+<p>This section will acquaint you with how functions work in Python, as well as how the values of mathematical functions are calculated. You've seen a handful of functions already, such as the absolute value function <code>abs</code> and the variable <code>type</code> function.</p>
+<h3 id="simple-mathematical-functions">Simple Mathematical Functions</h3>
+<p>In mathematics, a function is simply a way of relating an input value (often <span class="math"><em>x</em></span>) to an output value (sometimes <span class="math"><em>y</em></span> or <span class="math"><em>f</em>(<em>x</em>)</span>). For instance, a parabola may be expressed as</p>
+<p><span class="math"><em>y</em> = <em>f</em>(<em>x</em>) = <em>x</em><sup>2</sup></span></p>
+<p>and plotted as</p>
+<div class="figure">
+<img src="./img/parabola.png" />
+
+</div>
+<p>Properly speaking, the resulting curve represents the collection of ordered pairs <span class="math">(<em>x</em>, <em>y</em>)</span>. To plot this, we select a discrete set of points in the domain <span class="math"><em>x</em></span> and calculate the corresponding set of values <span class="math"><em>y</em></span>.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left"><span class="math"><em>x</em></span></th>
+<th align="left">-1.5</th>
+<th align="left">-1.25</th>
+<th align="left">-1</th>
+<th align="left">-0.75</th>
+<th align="left">-0.5</th>
+<th align="left">-0.25</th>
+<th align="left">0</th>
+<th align="left">.25</th>
+<th align="left">0.5</th>
+<th align="left">0.75</th>
+<th align="left">1</th>
+<th align="left">1.25</th>
+<th align="left">1.5</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><span class="math"><em>y</em></span></td>
+<td align="left">2.25</td>
+<td align="left">1.5625</td>
+<td align="left">1.0</td>
+<td align="left">0.5625</td>
+<td align="left">0.25</td>
+<td align="left">0.0625</td>
+<td align="left">0</td>
+<td align="left">0.0625</td>
+<td align="left">0.25</td>
+<td align="left">0.5625</td>
+<td align="left">1</td>
+<td align="left">1.5625</td>
+<td align="left">2.25</td>
+</tr>
+</tbody>
+</table>
+<p>Of course, the advantage of using a computer is that each step is easier to type than to calculate by hand. If you had to fill in this table, even using Python it would be tedious if you had to reset the variable <code>x</code> and retype the expression for <code>y</code> by hand every time.</p>
+<p>It is very likely that any equation you will wish to use in your studies and career will be more complicated than <span class="math"><em>y</em> = <em>x</em><sup>2</sup></span>. In order to minimize the amount of time typing code, as well as the likelihood of making a mistake due to repetition, we can use functions to capture the operations involved:</p>
+<pre><code>def sqr(x):
+    result = x * x
+    return result</code></pre>
+<p>Now instead of typing <code>x**2</code> or <code>x*x</code> each time you need a value, you can call the function <code>sqr(x)</code> instead. (Actually, in this trivial case, that's <em>more</em> keystrokes, but we'll let that slide.)</p>
+<p>A more realistic candidate is the quadratic equation (as we saw implemented in lab2), or the equation for an arbitrary line, <span class="math"><em>y</em> = <em>m</em><em>x</em> + <em>b</em></span>, where <span class="math"><em>m</em></span> is the slope and <span class="math"><em>b</em></span> is the intercept. A function which formats a slope and intercept into a string representing a line may look like this:</p>
+<pre><code>def line_eqn(m,b):
+    return &#39;y = %f x + %f&#39;%(m,b)</code></pre>
+<ol start="14" style="list-style-type: decimal">
+<li><code>print line_eqn(1.875,4)</code></li>
+</ol>
+<h3 id="math-library-functions"><code>math</code> Library Functions</h3>
+<p>The sine function is actually a shorthand way of a representing a common infinite series,</p>
+<p><span class="math">$$\sin(x) =  x - \frac{x^3}{3!} + \frac{x^5}{5!} - \frac{x^7}{7!} + \cdots = \sum_{n=0}^\infty \frac{(-1)^n}{(2n+1)!}x^{2n+1} \text{.}$$</span></p>
+<p>Of course, when you needed to calculate the value of sine in high school, you simply typed in <code>sin(x)</code> on your graphing calculator rather than summing the terms of a converging infinite series. Similarly, in Python you typically don't calculate the basic transcendental functions but instead utilize the <a href="https://docs.python.org/2/library/math.html"><code>math</code></a> module or a kindred function from the extensive <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/"><code>numpy</code></a> and <a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/"><code>scipy</code></a> libraries (as well as many other modules—we will introduce several of these in the next few weeks).</p>
+<p>To use library functions, you first need to import the module. We've done this a few times before, and will continue to do so in order to expand Python's functionality. There are two ways to do this. You can either <code>import</code> the entire library at once, and always type the module name:</p>
+<pre><code>import math
+
+math.sin(4)
+math.exp(3)</code></pre>
+<p>or you can <code>import</code> precisely what you need <code>from</code> the module (which is typically faster):</p>
+<pre><code>from math import sin, exp
+
+sin(4)
+exp(3)</code></pre>
+<p>So <code>sin</code> and <code>exp</code> are <em>methods</em> or <em>functions</em> residing within the <code>math</code> module, and now you know where to find them when you need them. The documentation will support you in discovering other functions and library variables like <code>pi</code>.</p>
+<p>How do these functions work—by which we mean not what numerical calculation takes place, but how does Python actually replace a variable name in a calculation with a value? Consider</p>
+<pre><code>d = math.sin(6.28)</code></pre>
+<p>In this case, Python first takes the value <code>6.28</code> and sends it to the <code>sin</code> function from the <code>math</code> module. Python calculates the result, and then effectively replaces the original <em>function call</em> to <code>math.sin</code> with the <code>return</code>ed value.</p>
+<pre><code>d = -0.00318530179313799</code></pre>
+<div class="figure">
+<img src="./img/fn-call1.png" />
+
+</div>
+<ol start="15" style="list-style-type: decimal">
+<li>What line of Python code could you write to import <code>log10</code> from <code>math</code>? (This is the logarithm base 10, <span class="math">log<sub>10</sub>(<em>x</em>)</span>.)</li>
+</ol>
+<h3 id="string-library-functions">String Library Functions</h3>
+<p>One of the elegant notions of programming is that programming helps generalize the idea of function beyond just manipulating numbers. What about other data types—in particular, the other data type we've examined thus far, the string? Python does have a lot of basic string manipulation functions.</p>
+<blockquote>
+A note on submitting answers: when your answer is a string, please include the bounding single or double quotes in your answer file. You do not need to explicitly include a <code>print</code> statement either.
+</blockquote>
+<pre><code>myStr = &#39;Mr. Jock, TV quiz PhD, bags few lynx.  &#39;
+
+len(myStr)              # counts number of characters in myStr
+myStr.count(&#39;x&#39;)        # counts number of occurrences of &#39;x&#39; in myStr
+myStr.find(&#39;x&#39;)         # returns position of character &#39;x&#39;
+myStr.lower()           # returns myStr as lower-case letters
+myStr.upper()           # returns myStr as upper-case letters
+myStr.replace(&#39;a&#39;, &#39;b&#39;) # replaces all occurrences of a with b in myStr
+myStr.strip()           # removes leading/trailing white space from myStr</code></pre>
+<p>Note that <code>myStr</code> itself never changes—functions like <code>upper</code> <em>return a copy</em> of <code>myStr</code> with the requested change made.</p>
+<p>String methods are also <em>composable</em>—that is, you can put them together to carry out more complex operations:</p>
+<ol start="16" style="list-style-type: decimal">
+<li><code>myStr.replace(' ', '-').strip()</code></li>
+<li><code>myStr.strip().replace(' ', '-')</code></li>
+</ol>
+<p>Now try these out:</p>
+<pre><code>quip = &#39;&quot;Sometimes I wonder whether the world is being run by smart people who are putting us on, or by imbeciles who really mean it.&quot; (Mark Twain)&#39;</code></pre>
+<p>(We honestly don't know if he said that but it sounds legit.)</p>
+<ol start="18" style="list-style-type: decimal">
+<li>How long is <code>quip</code>?</li>
+<li>How many times does <code>'b'</code> occur in this phrase?</li>
+<li>How many times does <code>' '</code> occur?</li>
+<li>Replace all instances of <code>' '</code> with <code>'a'</code>. Now how many times does <code>'a'</code> occur? (You can do this using an intermediate variable or by composing the operations as above.)</li>
+</ol>
+<p>Finally, let's close out this section with a teaser for the <code>list</code>, which we still haven't discussed in detail yet. Try these:</p>
+<ol start="22" style="list-style-type: decimal">
+<li>quip.split(' ')</li>
+<li>myStr.split(',')</li>
+</ol>
+<p>These break the string along the fault lines specified, or the <em>delimiters</em> <code>' '</code> and <code>','</code>, and return the result as a collection of strings known as a list.</p>
+<h3 id="application-cardinal-sine-function">Application: Cardinal Sine Function</h3>
+<p>The bread and butter of working effectively in Python is writing your own functions.</p>
+<p>Simple functions often reflect the mathematical understanding above. Consider the <em>cardinal sine function</em>, <span class="math">$\text{sinc}(x)$</span>, which is used in signal processing by electrical engineers.</p>
+<p><span class="math">$$\text{sinc}(x) = \frac{\sin(x)}{x}$$</span></p>
+<div class="figure">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Si_sinc.svg/700px-Si_sinc.svg.png" />
+
+</div>
+<p>To compose a function which reproduces this behavior for an arbitrary number, we could simply define:</p>
+<pre><code>from math import sin
+def sinc(x):
+    y = sin(x) / x
+    return y</code></pre>
+<p>This short function simply creates a new variable <code>y</code> which contains the result of <code>sin(x)/x</code> evaluated for the actual value of <code>x</code>. The <code>return</code> statement tells Python what the function gives back—in this case, the value of <code>y</code>.</p>
+<ol start="24" style="list-style-type: decimal">
+<li><code>sinc(1.5)</code></li>
+<li><code>sinc(3.1415)</code></li>
+</ol>
+<p>Let's consider a more involved use of this function:</p>
+<pre><code>s = sinc(3)
+t = s * sinc(4)</code></pre>
+<p>Whenever Python encounters a function like <code>sinc</code>, it steps into that function's code with the values it was given, executes the code, and then replaces the place where the function was <em>called</em> with the resulting <code>return</code>ed value. Here, that looks like this:</p>
+<div class="figure">
+<img src="./img/fn-call2.png" />
+
+</div>
+<p>This is simply a repetition of the earlier logic used in our <code>math.sin</code> example before.</p>
+<p>(Of course, we don't <em>have</em> to use <code>x</code>. We could use something else:</p>
+<pre><code>def sinc(elephant):
+    return sin(elephant)/elephant</code></pre>
+<p>But responsible variable names reflect their use.)</p>
+<p>We'll hit conditional logic more next week, but there is an excellent application for it right now in our function <code>sinc</code>. Consider</p>
+<pre><code>sinc(0)</code></pre>
+<p>Now, since the <em>real</em> definition of <span class="math">sinc</span> can involve taking a proper limit, the &quot;right&quot; (mathematical) answer for <span class="math">sinc(0) = 1.0</span>. Python won't handle this well, so we'll just modify our definition a little to accommodate it's intransigence:</p>
+<pre><code>def sinc(x):
+    if x == 0:
+        return 1.0  # in this case, the function returns instead of continuing on
+    y = sin(x) / x
+    return y</code></pre>
+<ol start="26" style="list-style-type: decimal">
+<li><code>sinc(0.0)</code></li>
+</ol>
+<h3 id="application-atmospheric-pressure">Application: Atmospheric Pressure</h3>
+<p>A mercury barometer is frequently used to precisely measure the atmospheric pressure. The height <span class="math"><em>h</em></span> of a column of mercury adjusts to a point where its weight plus force due to the mercury vapor pressure <span class="math"><em>p</em><sub>vapor</sub></span> balances the force due to the external atmospheric pressure <span class="math"><em>p</em><sub>atm</sub></span>. Mathematically, we write,</p>
+<p><span class="math"><em>p</em><sub>atm</sub> = <em>γ</em><em>h</em> + <em>p</em><sub>vapor</sub></span></p>
+<p>where <span class="math"><em>γ</em></span> is the specific weight of mercury. In SI units, <span class="math"><em>γ</em> = 133 × 10<sup>3</sup> N ⋅ m<sup> − 3</sup></span>. The vapor pressure of mercury is typically very small in relation to the other values, so we can safely neglect it (<span class="math"><em>p</em><sub>vapor</sub>|<sub><em>T</em> = 25<sup> ∘ </sup>C</sub> = 26.13<em>P</em><em>a</em></span>)<sup>[<a href="http://www.boulder.nist.gov/div838/SelectedPubs/NISTIR.6643.pdf">NISTIR 6643</a>]</sup>. A function which calculates the atmospheric pressure given the height of a column of mercury, then, is:</p>
+<pre><code>def p_atm(h_Hg):
+    &#39;&#39;&#39;
+    Calculate and return the atmospheric pressure (in Pa) given the height
+    of a column of mercury (in m).
+    &#39;&#39;&#39;
+    gamma = 133e3       # N/m^-3
+    P = gamma * h_Hg    # Pa
+    return P</code></pre>
+<ol start="27" style="list-style-type: decimal">
+<li><code>p_atm(0.598)</code> (The atmospheric pressure in pascals for <span class="math">598 mmHg</span>.)</li>
+<li><code>p_atm(0.598) / 101325</code> (The atmospheric pressure in the units of standard atmosphere<sup>[<a href="https://en.wikipedia.org/wiki/Atmosphere_(unit)">Wikipedia</a>]</sup> for <span class="math">598 mmHg</span>.)</li>
+</ol>
+<p>You can use this with <code>raw_input</code> to request and calculate arbitrary values:</p>
+<pre><code>h_str = raw_input(&#39;Give the height of the column of mercury in m:&#39;)
+h = float(h_str) # convert to a floating-point number
+print &#39;The result is %f pascals.&#39; % p_atm(h)</code></pre>
+<h3 id="application-the-u.s.d.o.t.-bridge-formula">Application: The U.S.D.O.T. Bridge Formula</h3>
+<p>The United States Department of Transportation, as part of its stewardship of the U.S. interstate highway system, maintains code standards for bridge construction. As a metric for preserving shipping infrastructure, the DOT uses the bridge formula<sup>[<a href="http://ops.fhwa.dot.gov/freight/sw/brdgcalc/calc_page.htm">DOT2014</a>]</sup> to limit the legal weight-to-length ratio for freight-laden vehicles crossing a bridge. In simplified form, the bridge formula is</p>
+<p><span class="math">$$W = 500 \left( \frac{LN}{N-1} + 12N + 36 \right)$$</span></p>
+<p>where <span class="math"><em>W</em></span> is the overall gross weight on any group of consecutive axles; <span class="math"><em>L</em></span> is the distance in feet between the outer axles of any group of consecutive axles; and <span class="math"><em>N</em></span> is the number of axles in the group under consideration.</p>
+<p>This prevents short trucks with heavy loads from damaging bridges.</p>
+<div class="figure">
+<img src="http://ops.fhwa.dot.gov/Freight/publications/brdg_frm_wghts/images/fig1.gif" />
+
+</div>
+<p>You will implement this formula as a function and use it to answer the following questions.</p>
+<p>In skeleton outline, your function should look like the following:</p>
+<pre><code>def bridge_formula(L, N):
+    &#39;&#39;&#39;
+    Calculate bridge weight in accordance with federal law.
+    
+    Args:
+        L:  distance between groups of consecutive axles, ft
+        N:  number of axles in group under consideration
+    Returns:
+        W:  overall gross weight on any group of consecutive axles, lb
+    &#39;&#39;&#39;
+    
+    # Calculate the bridge formula&#39;s weight W using L and N.
+    # ... your code here ...
+    
+    # Return the resulting weight W.
+    # ... your code here ...</code></pre>
+<p>Complete the function <code>bridge_formula</code> by adding lines of code to accomplish both tasks indicated. As a test of your function, the following values are correct: <span class="math"><em>L</em> = 51</span>, <span class="math"><em>N</em> = 5</span>, <span class="math"><em>W</em> = 79, 875</span>. (This describes a <span class="math">51′</span>, 5-axle semi which is legally allowed to carry <span class="math">79, 875 lb</span>, including freight and truck weight—in practice, U.S.D.O.T. rounds to <span class="math">80, 000</span> but we won't worry about that layer of complexity here.)</p>
+<ol start="29" style="list-style-type: decimal">
+<li><code>bridge_formula(45,5)</code></li>
+<li><code>bridge_formula(20,3)</code></li>
+</ol>
+<blockquote>
+☞<em>Aside</em>: The interstate highway system was first established in the wake of World War I as a defense measure against ground invasion by a foreign power<sup>[<a href="https://en.wikipedia.org/wiki/Interstate_Highway_System#History">Wikipedia</a>]</sup>.
+</blockquote>
+<h2 id="blocks-scope">Blocks &amp; Scope</h2>
+<blockquote>
+︎❖ <em>Objective</em>: Explain blocks and variable scope and understand how it impacts variable use.
+</blockquote>
+<p>A <em>block</em> in Python refers to a section of code that is sequentially executed as a unit. Blocks are differentiated by indenting the lines of code all together. (And Python is <em>very</em> strict about the <em>number</em> of spaces being consistent.) For instance, consider this program to calculate the pressure of an ideal gas given the temperature and volume (of given number of molecules):</p>
+<p><span class="math">$$P = \frac{RT}{V} \text{.}$$</span></p>
+<pre><code>def pressure_IG(T, V):
+    # T should be in deg C and V in cubic meters
+    R = 8.314 # ideal gas constant, joules / deg C
+    P = R * T / V
+    return P
+
+temperature = 100.0 # deg C
+volume = 0.01 # cubic meters
+pressure = pressure_IG(temperature, volume)
+
+print &#39;The pressure of&#39;, volume, &#39; cubic meters of gas at &#39;, temperature, &#39;deg C is&#39;, pressure, &#39;pascals&#39;</code></pre>
+<p>This program has two blocks. The first is the outermost layer, the lines of code in the first column which will be executed sequentially. Line by line, here is what the program does.</p>
+<p>First, Python notices that you have created a function <code>pressure_IG</code> that accepts two <em>arguments</em>, or independent variables.</p>
+<div class="figure">
+<img src="./img/block-1.png" />
+
+</div>
+<p>The code within that function, however, is skipped over until later, and Python proceeds within <em>the same block</em> to the next line, defining a variable <code>temperature</code>. (The comment line is ignored.)</p>
+<div class="figure">
+<img src="./img/block-2.png" />
+
+</div>
+<p>Again, Python proceeds to interpret the next line as defining a variable <code>volume</code>.</p>
+<div class="figure">
+<img src="./img/block-3.png" />
+
+</div>
+<p>Next, Python attempts to define a variable <code>pressure</code>. But to do so, it finds that it needs to look at the block of code referred to by the function <code>pressure_IG</code>. So Python carries the values of <code>temperature</code> and <code>volume</code> over and places them in <code>T</code> and <code>V</code>,</p>
+<div class="figure">
+<img src="./img/block-4.png" />
+
+</div>
+<p>Given <code>T</code> and <code>V</code> already, Python now enters the block of the function definition for <code>pressure_IG</code> and executes the code there. First <code>R</code> is defined...</p>
+<div class="figure">
+<img src="./img/block-5.png" />
+
+</div>
+<p>...and then the ideal gas pressure <code>P</code> is calculated.</p>
+<div class="figure">
+<img src="./img/block-6.png" />
+
+</div>
+<p><code>pressure_IG</code> <code>return</code>s <code>P</code>...</p>
+<div class="figure">
+<img src="./img/block-7.png" />
+
+</div>
+<p>...which value is then used to define <code>pressure</code> in the main block and output the final result.</p>
+<div class="figure">
+<img src="./img/block-8.png" />
+
+</div>
+<p>Blocks are differentiated by their indentation. Often, blocks end with a specific command, like <code>return</code>. However, this is not imperative. For instance, some functions simply carry out a task and then end:</p>
+<pre><code>def warn(msg):
+    print &#39;WARNING:  &#39;, msg
+
+warn(&#39;Keyboard not responding. Press any key to continue.&#39;)</code></pre>
+<h3 id="scope">Scope</h3>
+<p>Now a slightly strange situation can arise. Consider the script:</p>
+<pre><code>def sqr(x):
+    return x ** 2
+
+x = 5
+y = 3
+print sqr(y)</code></pre>
+<p>Here we see <em>two</em> variables <code>x</code>—one defined inside of the function <code>sqr</code> and the other in the main block of code. We will use the concept of <em>variable scope</em> to understand what each <code>x</code> means and where.</p>
+<p>Basically, if we have a single block of code, then any reference to a variable or name (such as <code>x</code>) is interpreted by Python to mean the <code>x</code> within that block.</p>
+<p>We can do strange things with blocks: since a variable defined inside of a block &quot;overrides&quot; other variables with the same name defined outside of the block, the following code is valid in Python, if confusing:</p>
+<pre><code>x = 5
+
+def do_calc():
+    x = 4           # &lt;-- this is a different `x`!
+    print x
+
+print x             # &lt;-- this refers to the first `x` (with value 5)</code></pre>
+<p>What is the value of each <code>x</code> at the marked places in the code below? (<em>I.e.</em>, after the line indicated has been executed.)  Your answers should be integers.</p>
+<pre><code>x = 4
+x *= 2          # 31.
+
+def do_calc(x):
+    print x     # 32.
+    return x ** 2
+
+y = x + 2
+x = do_calc(y)  # 33.</code></pre>
+<p>Again, this freedom means that you need to choose variable names responsibly: <code>n_entries</code> is always better than <code>n</code>!</p>
+<h2 id="in-conclusion">In Conclusion</h2>
+<p>Note that questions 31–33 are in the code block above.</p>
+<ol start="34" style="list-style-type: decimal">
+<li>How long did this lab exercise take you to complete (in minutes)?</li>
+<li>Cite any consultations or references required to complete your work.  (But please include this number in your file even if blank!)</li>
+</ol>
+<p>Save your file and submit it.</p>
+<!-- A.M.D.G. -->
+</div>
+</body>
+</html>

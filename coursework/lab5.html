@@ -1,0 +1,326 @@
+<!doctype html>
+<html>
+<head>
+
+<meta charset="utf-8" />
+<title>CS 101—Lab 5</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="./css/style.css">
+
+<!-- Loading mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+</head>
+<body>
+<div class="container" id="notebook-container">
+<h1 id="looping-lists-and-iteration">Looping, Lists, and Iteration</h1>
+<!-- tags:  for, searching, file i/o, iteration, list -->
+<blockquote>
+<p>︎❖ <em>Objectives</em>:</p>
+<ol style="list-style-type: decimal">
+<li><p>Use loops to carry out repetitive tasks.</p></li>
+<li><p>Explain lists as a compound data type (with applications).</p></li>
+<li>Load and save data to and from disk.</li>
+</ol>
+</blockquote>
+<ul>
+<li>Write your NetID at the top of a new blank text file and save it as <code>lab5.txt</code> in the <code>Desktop/lab5</code> directory.  Make sure to number your answers.</li>
+</ul>
+<h2 id="lists">Lists</h2>
+<p>We've gently touched on the topic of <code>list</code>s a few times in this class already, and now it's time to tackle it head-on. The <code>list</code> is the fundamental compound data type in Python, a way of storing a collection of data together in one place for convenience.</p>
+<p>Python can generate <code>list</code>s for you automatically; consider the <code>range</code> function:</p>
+<pre><code>range(10)
+range(5,15)
+range(0,20,2)
+range(0,-10,-1)</code></pre>
+<p>Be careful to always be aware whether you need the right-hand number included in your list; if you do, simply add one:</p>
+<pre><code>nx = 10
+range(nx+1)</code></pre>
+<p>(This is commonly the case with grids for numerical problems, for instance.)</p>
+<p>List indexing works much the same as string indexing, except that each element of the list is referred to rather than each digit or character.</p>
+<pre><code>range(10)[5:]</code></pre>
+<p>Lists also need not contain only one data type.</p>
+<pre><code>[&#39;dual&#39;, 2.0]</code></pre>
+<p>A neat trick: to reverse a list automatically, index it with no start index (so counting from the beginning), no end index (counting until the end), and a negative step size (so counting backwards).</p>
+<ol start="1" style="list-style-type: decimal">
+<li><code>range(10)[::-1]</code></li>
+</ol>
+<p>Also, note that <code>list</code>s repeat like strings when “multiplied” with <code>*</code>:</p>
+<pre><code>[5] * 3 == [5, 5, 5]
+[5] * 3 &lt;&gt; [15]</code></pre>
+<p>You can add (<code>append</code>) elements to or <code>remove</code> elements from a list:</p>
+<pre><code>my_list = [&#39;sunshine&#39;, &#39;breeze&#39;, &#39;daisy&#39;, &#39;clover&#39;, &#39;gasoline&#39;]
+my_list.remove(&#39;gasoline&#39;)  # one of those things was not like the others
+print my_list
+
+my_list.append(&#39;napping&#39;)
+print my_list</code></pre>
+<h2 id="loops">Loops</h2>
+<p>Although a few varieties of loops are supported in Python (<code>do</code>, <code>while</code>), the loop <em>par excellence</em> is <code>for</code>. <code>for</code> loops show up in solving a wide variety of engineering problems, ranging from iterated solution of structural analysis scenarios to integrating equations of motion for molecules or satellites forward.</p>
+<p>Let's start by seeing <code>for</code>'s ability to show us each element of an existing <code>list</code> of data.</p>
+<pre><code>colors = [&#39;teal&#39;, &#39;mauve&#39;, &#39;taupe&#39;, &#39;ecru&#39;]
+for color in colors:
+    print &#39;a can of %s paint&#39;%color</code></pre>
+<p>Or another way, this time with a calculation:</p>
+<pre><code>counter_sum = 0
+for counter in range(20):
+    counter_sum += counter
+
+print counter_sum</code></pre>
+<p>which sums all the numbers up to (but not including) 20. Note that <code>counter</code> continues to exist after the loop, containing its final assigned value of 19.</p>
+<h3 id="application-counting-string-components">Application: Counting String Components</h3>
+<p>A <code>for</code> loop printing out the alphabet could look like this (using a <em>string constant</em> <code>ascii_lowercase</code>, which is simply the lower-case alphabet as a string (try <code>print ascii_lowercase</code> to see what we mean)<sup>[<a href="https://docs.python.org/2/library/string.html#string-constants">PyDocs</a>]</sup>):</p>
+<pre><code>from string import ascii_lowercase  # a useful predefined string &#39;abcde...&#39;
+for letter in ascii_lowercase:
+    print &#39;letter:\t%s&#39;%letter</code></pre>
+<p>Put this <code>for</code> loop into a function <code>count_letters</code> which accepts a parameter <code>text</code>:</p>
+<pre><code>from string import ascii_lowercase  # a useful predefined string &#39;abcde...&#39;
+def count_letters(text):
+    for letter in ascii_lowercase:
+        print &#39;letter: %s&#39;%letter</code></pre>
+<p>Add a line to the <code>for</code> loop which using the string <code>count</code> function to count the number of times the current letter occurs in <code>text</code>.</p>
+<p><code>lettercount = ... your code here ...</code></p>
+<p>Add that count to the output:</p>
+<pre><code>print &#39;letter: %s, %s&#39;%(letter,lettercount)
+
+true_pangram = &#39;This pangram contains four As, one B, two Cs, one D, thirty Es, six Fs, five Gs, seven Hs, eleven Is, one J, one K, two Ls, two Ms, eighteen Ns, fifteen Os, two Ps, one Q, five Rs, twenty-seven Ss, eighteen Ts, two Us, seven Vs, eight Ws, two Xs, three Ys, &amp; one Z.&#39;</code></pre>
+<p>This string, <code>true_pangram</code>, <em>does</em> contain the following, and may be used as a test of your functions correctness. (Use <code>true_pangram.lower()</code>:  <code>count_letters(true_pangram.lower())</code>.)</p>
+<table border="1">
+<thead>
+<tr class="header">
+<th align="left">a</th>
+<th align="left">b</th>
+<th align="left">c</th>
+<th align="left">d</th>
+<th align="left">e</th>
+<th align="left">f</th>
+<th align="left">g</th>
+<th align="left">h</th>
+<th align="left">i</th>
+<th align="left">j</th>
+<th align="left">k</th>
+<th align="left">l</th>
+<th align="left">m</th>
+<th align="left">n</th>
+<th align="left">o</th>
+<th align="left">p</th>
+<th align="left">q</th>
+<th align="left">r</th>
+<th align="left">s</th>
+<th align="left">t</th>
+<th align="left">u</th>
+<th align="left">v</th>
+<th align="left">w</th>
+<th align="left">x</th>
+<th align="left">y</th>
+<th align="left">z</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">4</td>
+<td align="left">1</td>
+<td align="left">2</td>
+<td align="left">1</td>
+<td align="left">30</td>
+<td align="left">6</td>
+<td align="left">5</td>
+<td align="left">7</td>
+<td align="left">11</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">2</td>
+<td align="left">2</td>
+<td align="left">18</td>
+<td align="left">15</td>
+<td align="left">2</td>
+<td align="left">1</td>
+<td align="left">5</td>
+<td align="left">27</td>
+<td align="left">18</td>
+<td align="left">2</td>
+<td align="left">7</td>
+<td align="left">8</td>
+<td align="left">2</td>
+<td align="left">3</td>
+<td align="left">1</td>
+</tr>
+</tbody>
+</table>
+<p>Use the following string to answer the subsequent questions:</p>
+<pre><code>false_pangram = &#39;This pangram contains four As, one B, two Cs, one D, thirty Es, five Fs, five Gs, seven Hs, eleven Is, one J, one K, two Ls, two Ms, eighteen Ns, fifteen Os, two Ps, one Q, five Rs, twenty-seven Ss, eighteen Ts, two Us, seven Vs, eight Ws, two Xs, three Ys, &amp; one Z.&#39;</code></pre>
+<p>This string, <code>false_pangram</code>, claims to contain the following:</p>
+<table border="1">
+<thead>
+<tr class="header">
+<th align="left">a</th>
+<th align="left">b</th>
+<th align="left">c</th>
+<th align="left">d</th>
+<th align="left">e</th>
+<th align="left">f</th>
+<th align="left">g</th>
+<th align="left">h</th>
+<th align="left">i</th>
+<th align="left">j</th>
+<th align="left">k</th>
+<th align="left">l</th>
+<th align="left">m</th>
+<th align="left">n</th>
+<th align="left">o</th>
+<th align="left">p</th>
+<th align="left">q</th>
+<th align="left">r</th>
+<th align="left">s</th>
+<th align="left">t</th>
+<th align="left">u</th>
+<th align="left">v</th>
+<th align="left">w</th>
+<th align="left">x</th>
+<th align="left">y</th>
+<th align="left">z</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">4</td>
+<td align="left">1</td>
+<td align="left">2</td>
+<td align="left">1</td>
+<td align="left">30</td>
+<td align="left">5</td>
+<td align="left">5</td>
+<td align="left">7</td>
+<td align="left">11</td>
+<td align="left">1</td>
+<td align="left">1</td>
+<td align="left">2</td>
+<td align="left">2</td>
+<td align="left">18</td>
+<td align="left">15</td>
+<td align="left">2</td>
+<td align="left">1</td>
+<td align="left">5</td>
+<td align="left">27</td>
+<td align="left">18</td>
+<td align="left">2</td>
+<td align="left">7</td>
+<td align="left">8</td>
+<td align="left">2</td>
+<td align="left">3</td>
+<td align="left">1</td>
+</tr>
+</tbody>
+</table>
+<p>where <code>ascii_lowercase</code> is a string containing the alphabet.</p>
+<ol start="2" style="list-style-type: decimal">
+<li><p>Which letters, if any, have different counts from the claimed values? You will need to use <code>lower</code> when you send <code>false_pangram</code> as a parameter to <code>count_letter</code>. Answer as a comma-separated list in alphabetical order: for example, <code>a,b,o,x</code>.</p></li>
+<li><p>Save your function (including <code>from string import ascii_lowercase</code>) in a file <code>count_letters.py</code> and answer this question with <code>count_letters.py</code> (literally that phrase). Verify that the file is included in your final submission of this lab.</p></li>
+</ol>
+<h3 id="application-chemical-names">Application: Chemical Names</h3>
+<p>Last week, you wrote a function which accepted as input a chemical element symbol and returned the corresponding name of the element. You will now update this function—a solution is available <a href="./src/symbols.py">here</a> if you had difficulty.</p>
+<ol start="4" style="list-style-type: decimal">
+<li><p>You will write a <code>while</code> loop around <code>symbol_to_name</code> which will do the following. No change is necessary to the function <code>symbol_to_name</code>.</p>
+<ol style="list-style-type: decimal">
+<li><p>Check whether we should end (the <code>while</code> statement). (These are not question numbers.)</p></li>
+<li><p>Ask the user for a symbol to check (using <code>raw_input</code>—check the Python docs if you've forgotten this one).</p></li>
+<li><p>If the symbol input is <code>'x'</code>, then you should tell the program to end the loop the next time around. Otherwise, you should have the program call <code>symbol_to_name</code> on the input string.</p></li>
+</ol>
+<p>An outline:</p>
+<pre><code>while go_flag:
+    # ask for input symbol
+    (your code here)
+    
+    # check input symbol for &#39;x&#39;
+    if (your code here):
+        # change go_flag to stop
+        (your code here)
+    else:
+        # change the symbol
+        (your code here)</code></pre>
+<p>Save this program as <code>symbols_io.py</code> and answer this question with <code>symbols_io.py</code> (literally that phrase).</p></li>
+</ol>
+<h2 id="file-input-and-output">File Input and Output</h2>
+<p>Effective use of input and output (often I/O in computerese) is often the only way to get data into your program or out again. Formally, there are a couple of ways you can handle this:</p>
+<ul>
+<li><p>You can explicitly <code>open</code>, <code>read</code> from or <code>write</code> to, and finally <code>close</code> the file. This is the classic model of working with files<sup>[<a href="https://docs.python.org/2/tutorial/inputoutput.html#reading-and-writing-files">docs</a>]</sup> and transfers well across all computing languages.</p>
+<p>You first must <code>open</code> a file. You should additionally specify the <em>mode</em> you are opening the file in—this tells Python what you intend to do with the file and its contents. You will commonly only need to <code>'r'</code>ead a file (as input) or <code>'w'</code>rite a file (as output).</p>
+<pre><code>dataFileName = &#39;lists.txt&#39;
+dataFile = open(dataFileName, &#39;r&#39;)
+print(&#39;Using file %s&#39;%dataFileName)</code></pre>
+<p>After <code>open</code>ing the file, you are free to read the contents using a number of methods. <code>read</code> will give you the complete contents of the file as a string; you may also find some utility in using <code>readline</code>, which will be used later in this course.</p>
+<pre><code>data = dataFile.read().splitlines()
+print data</code></pre>
+<p>When you are done, don't forget to <code>close</code> the file. If you neglect this step, the file may lose data and you are wasting system memory by keeping it open.</p>
+<pre><code>dataFile.close()</code></pre></li>
+<li><p>Python also provides a <em>context</em> using the <code>with</code> statement. In this case, you only have to specify the <code>open</code>ing and <code>read</code>ing/<code>write</code>ing actions, and if anything fails for any reason, Python will <code>close</code> the file for you automatically.</p>
+<pre><code>dataFileName = &#39;lists.txt&#39;
+with open(dataFileName, &#39;r&#39;) as dataFile:
+    print(&#39;Using file %s&#39;%dataFileName)
+    data = dataFile.read().splitlines()
+    print data</code></pre></li>
+</ul>
+<p>In both cases, <code>data</code> becomes a list of the lines in <code>dataFile</code>. If you would like to test the foregoing code yourself, please download the file <a href="./data/lists.txt"><code>lists.txt</code></a> to your <code>lab5</code> directory.</p>
+<h3 id="application-microarray-data-gene-expression">Application: Microarray Data Gene Expression</h3>
+<ol start="5" style="list-style-type: decimal">
+<li><p>We have a file <code>data1.txt</code> (<a href="./data/data1.txt">download here</a>) which contains the values of microarray data (a type of biological analysis). As these data describe gene expression rates in a samples (more or less), we wish to scale these data so that they all fall in a range from 0.0 to 1.0 (or <em>normalize</em> them). Write a short function <code>get_data(filename)</code> which:</p>
+<ul>
+<li><p>opens the file <code>filename</code></p></li>
+<li><p>outputs the first line</p></li>
+<li><p>loops through all lines, converting the value of each to a <code>float</code> and adding (<code>append</code>ing) it to a <code>list</code></p></li>
+<li><p>returns the list after closing the file</p></li>
+</ul>
+<p>Next, write a function <code>normalize(dataset)</code> which:</p>
+<ul>
+<li><p>finds the minimum (<code>min</code>) and maximum (<code>max</code>) data values in the set</p></li>
+<li><p>gets the difference between the max and min (the data range)</p></li>
+<li><p>creates an empty list <code>newdata</code></p></li>
+<li><p>subtracts the minimum value from every value (sets the list minimum to zero) and divides every value by the range (sets the list maximum to one)</p></li>
+<li><p>adds that value to an array <code>newdata</code></p></li>
+<li><p>returns the normalized list of values <code>newdata</code></p></li>
+</ul>
+<p>The core of your function will look something like this (allowing for differences in variable names):</p>
+<pre><code>data = []
+for value in dataset:
+    data.append((value-datamin)/datarange)</code></pre>
+<p>You can demonstrate that both of these functions are working properly as follows:</p>
+<pre><code>data = get_data(&#39;data1.txt&#39;)
+norm_data = normalize(data)
+min(norm_data) == 0.0
+max(norm_data) == 1.0
+norm_data[0] == 0.003017004936917169  # may not be exact but should be close</code></pre>
+<p>Save your script as <code>dataproc.py</code> and answer this question as <code>dataproc.py</code> (literally that phrase). Make sure that your function is included in your submission.</p></li>
+</ol>
+<h2 id="in-conclusion">In Conclusion</h2>
+<ol start="6" style="list-style-type: decimal">
+<li>How long did this lab exercise take you to complete (in minutes)?  (We promise we'll stop asking this in lab6.)</li>
+<li>Cite any consultations or references required to complete your work.</li>
+</ol>
+<!-- A.M.D.G. -->
+</div>
+</body>
+</html>

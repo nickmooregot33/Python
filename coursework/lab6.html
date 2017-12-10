@@ -1,0 +1,231 @@
+<!doctype html>
+<html>
+<head>
+
+<meta charset="utf-8" />
+<title>CS 101—Lab 6</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="./css/style.css">
+
+<!-- Loading mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+</head>
+<body>
+<div class="container" id="notebook-container">
+<h1 id="kind-of-blue">Kind of Blue</h1>
+<p>For this lab project, we are going to work with a list of blues musicians in various traditions. You should have the following files already in your <code>lab6</code> directory (if you don't, ask your TA):</p>
+<pre><code>lab6.txt
+process.py
+blues.txt
+zydeco.txt</code></pre>
+<p>Open the file <code>blues.txt</code> in a text editor and examine its format.</p>
+<pre><code># Delta Blues
+Cecil Augusta
+Mose Allison
+Tommy Bankhead
+...
+Elder Roma Wilson
+
+# Chicago Blues
+Alberta Adams
+Luther Allison
+...</code></pre>
+<p>We are going to <code>read</code> this file and run it through the standard pipeline of data analysis: data cleaning and preparation, data processing, and output.</p>
+<h2 id="data-cleaning-preparation">Data Cleaning &amp; Preparation</h2>
+<p>A file simply contains an ordered collection of characters and digits. Any logical interpretation is created by the user as he or she uses the data. Thus we first need to ensure that incoming data are in a suitable format and structure for further analysis.</p>
+<p>What does a suitable format look like? If you were organizing a library of these musicians' works, you could sort by surname or by musical style. There are several formats which could make sense, such as a collection of <em>database records</em> containing <em>fields</em> such as &quot;artist name&quot; and &quot;musical style&quot;. We will opt here for a spreadsheet-like organization: three &quot;columns&quot; of data: &quot;surname&quot;, &quot;first name&quot;, and &quot;style&quot;. Each entry will be a tuple inside of a list.</p>
+<p><strong>Data Logical Format:</strong></p>
+<pre><code>artist surname  artist first name   musical style
+Augusta         Cecil               Delta Blues
+Alexander       Alger &quot;Texas&quot;       Country Blues</code></pre>
+<p><strong>Data Machine Representation:</strong></p>
+<pre><code># musicians is a list of tuples
+musicians[0] = (&#39;Augusta&#39;, &#39;Cecil&#39;, &#39;Delta Blues&#39;)
+musicians[1] = (&#39;Alexander&#39;, &#39;Alger &quot;Texas&quot;&#39;, &#39;Country Blues&#39;)
+...</code></pre>
+<p>Thus a single record should have one entry from each of these fields. The data file we import from, however, is not in this format. Thus when importing the data we have to:</p>
+<ol style="list-style-type: decimal">
+<li>track which musical style we are currently importing; and</li>
+<li><em>tokenize</em> the name into first-name and surname components; and</li>
+<li>add the tuple of these three items to a list.</li>
+</ol>
+<p>(Those weren't question numbers yet.)</p>
+<p>Since this is a fairly involved process, we've provided a scaffolding for you to work with in <code>process.py</code>. This scaffolding uses a new keyword called <code>pass</code>. <code>pass</code> does, well, nothing. It's a placeholder, but it lets your code run. That is, this code entered by itself won't work:</p>
+<pre><code>for x in range(10):</code></pre>
+<p>because there's nothing for Python to do—it doesn't know whether to look for another line of code later or just end the <code>for</code> loop with nothing. Instead, try:</p>
+<pre><code>for x in range(10):
+    pass</code></pre>
+<p>which has a do-nothing line of code that Python knows to ignore. The scaffolding in <code>process.py</code> is full of <code>pass</code> statements so that it runs, but you should replace <em>all</em> of these with your own code by the end of this lab.</p>
+<ol start="0" style="list-style-type: decimal">
+<li><p>(This question won't be in your answer file, but you should complete it in order to make the next question easier.)</p>
+<p>If you have a line of text as a string:</p>
+<pre><code>example = &#39;Jimmy Clanton&#39;</code></pre>
+<p>and you'd like to turn it into a tuple <code>record = (surname, first_name)</code>, how would you do it?</p>
+<p>First, you'd probably want to split it into pieces so there is a separate <code>first_name</code> and <code>surname</code> to assign:</p>
+<pre><code>names = example.split(&#39; &#39;)</code></pre>
+<p>Now you have a <code>list</code> called <code>names</code> which looks like this:</p>
+<pre><code>[&#39;Jimmy&#39;, &#39;Clanton&#39;]</code></pre>
+<p>which you can use to assign the separate variables in your tuple either in two steps:</p>
+<pre><code>surname = names[1]
+first_name = names[0]
+record = (surname, first_name)</code></pre>
+<p>or in one step:</p>
+<pre><code>record = (names[1], names[0])</code></pre>
+<p>This gets a little trickier with multiple first names:</p>
+<pre><code>example = &#39;John Henry Barbee&#39;</code></pre>
+<p>In this case, I suggest the following method. First, split the name into its pieces like this:</p>
+<pre><code>names = example.split(&#39; &#39;)</code></pre>
+<p>Next, pull the surname out as a single name. (We have already removed Jrs. and Srs. from these data, so there's nothing exceptional left.)</p>
+<pre><code>surname = names[-1]</code></pre>
+<p>Finally, join the other names back together using the handy <code>join</code> method:</p>
+<pre><code>first_name = &#39; &#39;.join(names[:-1])
+record = (surname, first_name)</code></pre>
+<p>Let's now store a list of records. Practice this process on the following entries:</p>
+<pre><code>records = [] # an empty list
+entries = [&#39;Ivory Joe Hunter&#39;, &#39;Etta James&#39;, &#39;Little Willie Littlefield&#39;, &#39;Robert Lowery&#39;, &#39;J. J. Malone&#39;, &#39;Percy Mayfield&#39;, &#39;Jimmy McCracklin&#39;]
+
+# Cycle through each musician name and add it to records in format.
+for entry in entries:
+    names = entry.split(&#39; &#39;)
+
+    surname = names[-1]
+    first_name = &#39; &#39;.join(names[:-1])
+    records.append( (surname, first_name) )</code></pre>
+<p>Please make sure you understand this short program and what <code>records</code> looks like afterwards. Especially, why are there two sets of parentheses on the last line (<code>records.append</code>)? (You do not need to answer anything for this question zero.)</p></li>
+<li><p>Now we will turn the above process into a general script. Open the file <code>process.py</code> in your <code>lab6</code> directory. You will write a script in this file to load and process data. Answer this question literally with <code>process.py:process</code> (exactly that word).</p>
+<p>Write a function <code>process(filename)</code> which accepts a file name (such as <code>'blues.txt'</code>) and <code>return</code>s a list called <code>entries</code>. This function should do the following (in this order).</p>
+<blockquote>
+<strong>WARNING:</strong> Please make sure you get the indentation correct, since there are several levels in this function.
+</blockquote>
+<ul>
+<li><p>Create a blank list called <code>entries</code> and an empty string called <code>current_style</code>.</p></li>
+<li><p>Open the file <code>filename</code> for reading. (You may go back and review question five in <code>lab5</code> if you'd like to know more about the <code>with</code> keyword.)</p></li>
+<li><p>Loop through each line of the file and do the following:</p>
+<ul>
+<li><p>Strip the whitespace off of the ends of the line using the <a href="https://docs.python.org/2/library/stdtypes.html?highlight=strip#str.strip"><code>strip</code> method</a>.</p></li>
+<li><p>If the line is blank, <code>continue</code> execution. (The <code>continue</code> statement makes Python just go back to the <code>for</code> loop again with the next value—no more code is executed for the current value.)</p></li>
+<li><p>If a line starts with <code>#</code>, it represents the musical style to be assigned until the next line with <code>#</code>. In this case, remove the <code>'#'</code> from the beginning of the string and assign the musical style to <code>current_style</code>. The loop should then <code>continue</code>.</p></li>
+<li><p>Otherwise, a line contains a blues performer. In this case, process the record much as you did above in question zero, except that you also need to add a musical style to the tuple as the third element.</p>
+<p>These data should be appended to the list <code>entries</code> as a single entry in the form of a tuple,</p>
+<pre><code>(surname, first_name, musical_style)</code></pre>
+<p>(What does the scope of this variable <code>entries</code> need to be? How do you make an empty list? Here is an <a href="https://docs.python.org/2/tutorial/datastructures.html#list-comprehensions">example in the first code block</a>.)</p></li>
+</ul></li>
+<li><p>Finally, <code>return</code> the list <code>entries</code>.</p></li>
+</ul>
+<p>As an example, a file <code>zydeco.txt</code> which contains the data</p>
+<pre><code># Zydeco
+Boozoo Chavis
+C.C. Adcock
+...
+Rockin&#39; Dopsy
+Amede Ardoin
+Clifton Chenier</code></pre>
+<p>would satisfy the following conditions after being processed:</p>
+<pre><code>zydeco = process(&#39;zydeco.txt&#39;)
+zydeco[0] == (&#39;Chavis&#39;, &#39;Boozoo&#39;, &#39;Zydeco&#39;)
+zydeco[-3] == (&#39;Dopsy&#39;, &quot;Rockin&#39;&quot;, &#39;Zydeco&#39;)</code></pre>
+<p>Every <code>pass</code> statement should be replaced with a line or lines of your own code at this point.</p>
+<p>Typically, you would also need to test for duplicates. In this case, we've already removed duplicate entries that were present. (This may occur because the later entries will have different musical styles associated with them—many musicians performed in several styles within the genre of blues.)</p></li>
+</ol>
+<h2 id="data-processing">Data Processing</h2>
+<p>You should now have a function which loads an arbitrary file (with an expected format) and converts that file into a collection of records which you can now use to ask and answer questions about the properties of the data set.</p>
+<pre><code>blues = process(&#39;blues.txt&#39;)</code></pre>
+<h3 id="sorting">Sorting</h3>
+<p>For instance, sort by surname and list the first ten entries.</p>
+<pre><code>blues.sort()
+blues[:10]</code></pre>
+<p>Tuples will automatically be sorted by the first element, then the second, then the third; this makes sorting by surname easy. Sorting by the other fields, such as first name or style, is a bit more involved. You have to provide a <code>key</code> to <code>sort</code> so it knows what to sort by. The easiest way is to use the <code>operator.itemgetter</code> function:</p>
+<pre><code># sort by first name (second field)
+from operator import itemgetter
+blues.sort(key=itemgetter(1))</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li><p>Sort the musicians by first name. What is <code>blues[0]</code> in this case (the entire tuple)?</p></li>
+<li><p>What is <code>blues[-1]</code>?</p></li>
+<li><p>What is the most common surname? Typically within a list, you can just use <code>count</code> to answer this question. However, since the data we are interested in are nested inside of a tuple, you need to first add all of the surnames to another list:</p>
+<pre><code>surnames = []
+for musician in blues:
+    surnames.append(musician[0])</code></pre>
+<p>Now you have a list with multiple copies of different surnames—still not <em>quite</em> what we hope for. We need to do two things:</p>
+<ul>
+<li><p>Make our list contain only unique elements—that is, remove multiple copies from it. This is called <em>uniqifying</em> the list. The following code does this. (Don't worry about understanding it right now.)</p>
+<pre><code>def uniqify(input_list):
+    keys = {}
+    for e in input_list:
+        keys[e] = 1
+    return keys.keys()
+
+unique_surnames = uniqify(surnames)</code></pre>
+<p>You should test this function out to get a better idea of what it does:</p>
+<pre><code>my_list = [1,2,2,4,3,2,5,7,1,2]
+uniqify(my_list)</code></pre></li>
+<li><p>Next, use this list of unique surnames to generate a count of how many times each surname occurs in the main list.</p>
+<pre><code>surname_count = []
+for surname in unique_surnames:
+    surname_count.append((surname, surnames.count(surname)))</code></pre></li>
+</ul>
+<p>You should now be able to get the most common surname using a simple <code>surname_count.sort(key=itemgetter(1))</code>. Note that you need the <em>last</em> item, not the <em>first</em>. (Multiple names with the highest count exist. Take the actual last element.)</p></li>
+<li><p>How many performers are listed in the <code>'West Coast Blues'</code> style? To find this out from your data, you need to add all of the musical styles to a list, uniqify that list, and then count the number of times each style occurs, very similar to what you just did for surnames.</p></li>
+</ol>
+<h3 id="tokenizing">Tokenizing</h3>
+<p>To <em>tokenize</em> is to split a string into pieces (or <em>tokens</em>) by some rule. For instance, you've done this with <code>split</code> before:</p>
+<pre><code>&gt;&gt;&gt; &quot;The Well at the World&#39;s End&quot;.split(&#39; &#39;)
+[&#39;The&#39;, &#39;Well&#39;, &#39;at&#39;, &#39;the&#39;, &quot;World&#39;s&quot;, &#39;End&#39;]</code></pre>
+<p>We can extract some statistical information about the naming of blues artists by tokenizing all components of their first names and then counting how many times each token occurs. For instance, <code>Blind Lemon Jefferson</code> became <code>('Jefferson', 'Blind Lemon', 'Gospel Blues')</code>; we now wish to tokenize <code>'Blind Lemon'</code> into <code>'Blind'</code> and <code>'Lemon'</code> (since <code>'Blind'</code> at least is a common moniker).</p>
+<ol start="6" style="list-style-type: decimal">
+<li><p>What is the most common first name element? To answer this question, you need to first add all first name elements to a list.</p>
+<pre><code>first_names = []
+for musician in musicians:
+    first_names.append(musician[1])</code></pre>
+<p>Next, tokenize each name and add the components to a master list:</p>
+<pre><code>names = []
+for name in first_names:
+    for piece in name.split(&#39; &#39;):
+        names.append(piece.strip(&#39;&quot;&#39;).strip(&quot;&#39;&quot;))</code></pre>
+<p>Finally, uniqify this list and then create a list of the count of each name as before. (Multiple names with the highest count exist. Take the actual last element.)</p></li>
+<li><p>If you combine the most common first name with the most common surname, what name do you get? <!--Johnny Johnson or Johnny Smith --></p></li>
+<li><p>If this person exists, what style do they represent? (Answer <code>None</code> if there is no person with this name.)</p></li>
+</ol>
+<h2 id="data-output">Data Output</h2>
+<p>Finally, we need to use the results of our prior cleaning and processing to produce useful results. Some ways we may wish to use these data include:</p>
+<ul>
+<li>Creating a table of musicians by style. You could now output a table consisting of the style of blues followed by a list of performers in that category (in alphabetical order by surname). (Unnumbered because you won't do this right now.)</li>
+</ul>
+<ol start="9" style="list-style-type: decimal">
+<li><p>Generate derivative data, such as Wikipedia URLs. Consider the musician Blind Lemon Jefferson. The corresponding Wikipedia page URL for Mr. Jefferson (if it exists) would look like <code>https://en.wikipedia.org/wiki/Blind_Lemon_Jefferson</code>. Write a function <code>generate_url(name)</code> which accepts a tuple like the elements of <code>musicians</code> and returns a string containing the URL.</p>
+<p>This function needs to:</p>
+<ul>
+<li><p>replace spaces with underscores</p></li>
+<li><p>use string formatting to create a URL like this:</p>
+<pre><code>&#39;https://en.wikipedia.org/wiki/%s_%s&#39;%(first_name,surname)</code></pre></li>
+</ul>
+<p>Save this function in <code>process.py</code> and answer this question with <code>process.py:generate_url</code> (exactly that word).</p></li>
+</ol>
+<!-- A.M.D.G. -->
+</div>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!doctype html>
+<html>
+<head>
+
+<meta charset="utf-8" />
+<title>CS 101—Lab 12</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="./css/style.css">
+
+<!-- Loading mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+    <style>
+      #math_center { text-align:center; width:100%; background-color:yellow; }
+    </style>
+</head>
+<body>
+<div class="container" id="notebook-container">
+<h2 id="hookes-law">Hooke's Law</h2>
+<h3 id="polynomials-in-numpy">Polynomials in NumPy</h3>
+<p>NumPy provides a convenient <code>polynomial</code> module with a <code>Polynomial</code> object. (An object is a data type with beefed-up methods—think of <code>numpy.ndarray</code>s, for example.) You will recall, of course, that an <span class="math inline"><em>n</em></span>th-order polynomial has the form <br /><span class="math display"><em>a</em><sub><em>n</em></sub><em>x</em><sup><em>n</em></sup> + <em>a</em><sub><em>n</em> − 1</sub><em>x</em><sup><em>n</em> − 1</sup> +  ⋅  ⋅  ⋅  + <em>a</em><sub>2</sub><em>x</em><sup>2</sup> + <em>a</em><sub>1</sub><em>x</em><sup>1</sup> + <em>a</em><sub>0</sub>.</span><br /></p>
+<p>For NumPy, polynomials are represented like this:</p>
+<pre><code>from numpy.polynomial import *
+Polynomial([a0, a1, a2, ..., anm1, an])</code></pre>
+<p>(assuming, of course, that <code>a0</code> ... <code>an</code> are defined). As a concrete example: <br /><span class="math display">4<em>x</em><sup>3</sup> + 2<em>x</em><sup>2</sup> − 1</span><br /> would be represented by NumPy as</p>
+<pre><code>Polynomial([-1, 0, 2, 4])</code></pre>
+<p>(Note particularly that the order in which we prefer to write things is here opposite of the module's preference.)</p>
+<ol style="list-style-type: decimal">
+<li><p>(1 pt) Create a <code>Polynomial</code> object <code>p</code> which represents the polynomial <br /><span class="math display">5<em>x</em><sup>5</sup> + 1.</span><br /></p>
+<p>What is its string representation (<em>i.e.</em>, what does Python return when you enter <code>print p</code>)?</p></li>
+</ol>
+<!--
+poly([-1.  0.  2.  4.])
+Polynomial([-1.,  0.,  2.,  4.], [-1,  1], [-1,  1])
+-->
+<ol start="2" style="list-style-type: decimal">
+<li>(1 pt) The real convenience of the <code>numpy.polynomial</code> module is how it lets you handle evaluation of the polynomial itself. What is the result of entering <code>print p(4.5)</code>?</li>
+</ol>
+<!--
+404.0
+-->
+<ol start="3" style="list-style-type: decimal">
+<li>(1 pt) <code>numpy.polynomial</code> naturally works well with <code>MatPlotLib</code>: plot <code>p</code> over the range <code>[0, 5]</code> with <code>501</code> data points. Save the figure as <code>figure_3.png</code> and this question accordingly.</li>
+</ol>
+<h3 id="hookes-law-1">Hooke's Law</h3>
+<p>The easiest way (using NumPy) to fit a curve to a data set is to simply have the <code>Polynomial</code> fit the data directly.</p>
+<pre><code>x = np.linspace(0,4,5)
+y = np.array([1.1, 2.1, 3.0, 4.1, 5.5])
+n = 1   # fit the curve as a line (first-order polynomial)
+from numpy.polynomial.polynomial import *
+y_fit = polyfit(x,y,n)
+from numpy.polynomial import Polynomial
+y_fn = Polynomial(y_fit)
+
+plt.plot(x,y,&#39;ro&#39;,
+         x,y_fn(x),&#39;b-&#39;)
+plt.show()</code></pre>
+<p>This provides a first-order fit to a data set. In this case, we can identify the intercept as the length of the spring under zero displacing force and the slope as the spring constant <span class="math inline"><em>k</em></span>.</p>
+<p>Robert Hooke was a noted contemporary of Isaac Newton, and like many natural philosophers of that period, he worked in many separate fields like microscopy and physics. Hooke discovered that their is a <em>linear</em> relationship between force and displacement for springs made of many materials like metal, writing “ut tensio, sic vis”—“as the extension, thus the force”<sup>[<a href="https://en.wikipedia.org/wiki/Robert_Hooke">Wikipedia</a>]</sup>. In modern mathematical notation, we write that a the displacement of an object at the end of a spring <span class="math inline"><em>x</em></span> is a linear relationship of the applied force <span class="math inline"><em>F</em></span> and the spring constant <span class="math inline"><em>k</em></span>: <br /><span class="math display"><em>x</em> =  − <em>F</em>/<em>k</em></span><br /> or <br /><span class="math display"><em>F</em> =  − <em>k</em><em>x</em>.</span><br /></p>
+<div class="figure">
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Hookes-law-springs.png/231px-Hookes-law-springs.png" alt="" />
+
+</div>
+<ol start="4" style="list-style-type: decimal">
+<li><p>(2 pt) We will consider how well adding additional terms to the polynomial series models the data at hand. In the file <code>spring.txt</code> you will find <span class="math inline"><em>x</em></span> and <span class="math inline"><em>y</em></span> coordinates for measurements on a fairly loose spring. You should load these data using the <code>numpy.loadtxt</code> function; in the following, this is called <code>data</code>. Try fitting the spring to higher-order polynomials than just first-order and notice what happens to the size of the quadratic coefficients and higher. The <em>error</em> introduced by omitting these components is quite small, as the true behavior is linear and any deviation is often due to measurement imprecision rather than nonlinear behavior. For instance, to plot the quadratic fit as a curve, you would do the following:</p>
+<pre><code>x = data[0]
+y = data[1]
+y_quadratic = Polynomial(polyfit(x,y,2))
+plt.plot(x,y_quadratic(x),&#39;b-&#39;)
+plt.show()</code></pre>
+<p>To plot the error of the quadratic fit relative to the linear fit, you would plot something like this:</p>
+<pre><code>y_linear = Polynomial(polyfit(x,y,1))
+plt.plot(x,y_quadratic(x)-y_linear(x),&#39;b-&#39;)
+plt.show()</code></pre>
+<p>For this problem, you should plot two plots, one above the other (using <code>subplot</code>—check <a href="https://relate.cs.illinois.edu/course/CS101/f/pdfs/lab10.html">lab #10</a> for usage details if you need a refresher). The <em>top subplot</em> should show the polynomial curves from first to fourth order plotted over the range of the data as well as the data points. There should be four curves in the plot (although they may overlap substantially) as well as the data points. The <em>bottom subplot</em> should depict the error relative to the linear fit. (That is, <code>y_cubic(x)-y_linear(x)</code> and so forth.) There should be three curves in the plot.</p>
+<p>Save the plot as <code>figure_4.png</code> and answer this question with <code>figure_4.png</code> accordingly.</p></li>
+</ol>
+<!--
+x = np.linspace(0,10,11)
+Fr = -k*x + npr.normal(scale=2e0,size=x.shape) - 1.5
+F_ = -k*x - 1.5
+plt.plot(x,Fr,'rx',x,F_,'b-')
+plt.show()
+data = np.vstack( (x,Fr) )
+np.savetxt('spring.txt',data)
+-->
+<!--
+
+y_linear = Polynomial(polyfit(x,y,1))
+y_quadratic = Polynomial(polyfit(x,y,2))
+y_cubic = Polynomial(polyfit(x,y,3))
+y_quartic = Polynomial(polyfit(x,y,4))
+y_quintic = Polynomial(polyfit(x,y,5))
+plt.plot(x,y_linear(x),'r-',
+         x,y_quadratic(x),'b-',
+         x,y_cubic(x),'g-',
+         x,y_quartic(x),'y-',
+         x,y_quintic(x),'c-')
+plt.show()
+plt.plot(x,y_quadratic(x)-y_linear(x),'b-',
+         x,y_cubic(x)-y_linear(x),'g-',
+         x,y_quartic(x)-y_linear(x),'y-',
+         x,y_quintic(x)-y_linear(x),'c-')
+plt.show()
+-->
+<p>Although we can quantify this error, note that increasing the order of the fit doesn't really improve the situation. Generally speaking, you can easily overfit data and make your model <em>less</em> appropriate for the physics you are trying to capture. In this case, the data are linear so so should your model be.</p>
+<h4 id="experimental-data">Experimental Data</h4>
+<ol start="5" style="list-style-type: decimal">
+<li><p>(1 pt) Use the contents of the file <code>copper.txt</code> to find a spring constant for the system whose displacement data are recorded in that file.</p>
+<p>In order to do this, you simply need to load the data (again, using <code>numpy.loadtxt</code>), fit the data to a line, and take the linear constant for your answer. <em>Spring constants should always be positive</em>, so flip the sign if necessary.</p></li>
+</ol>
+<!--
+0.00011308145176
+-->
+<ol start="6" style="list-style-type: decimal">
+<li><p>(2 pts) Compose a function <code>fit_spring_data</code> which accepts as a parameter a filename <code>datafile</code>. This function should return the spring constant obtained from fitting the data in that file to a line.</p>
+<p>Save this function in the file <code>spring.py</code> and answer this question with <code>spring.py:fit_spring_data</code>. This should be the only code in the file unless you wish to add a unit testing function (good form!) or require <code>import</code> statements.</p></li>
+</ol>
+<!--
+
+# generate spring data
+ks = np.linspace(1.13e-4,1.48e-4,5)
+names = ['copper','steel','zinc','brass','nickel']
+
+x = np.linspace(0,1,26)
+
+for (k,name) in zip(ks,names):
+    F_ = -k*x
+    Fr = -k*x + npr.normal(scale=2e-6,size=x.shape)
+    #plt.plot(x,Fr,'rx',x,F_,'b-')
+    #plt.show()
+    data = np.vstack( (x,Fr) )
+    np.savetxt('%s.txt'%name,data)
+
+# read in spring data
+from numpy.polynomial.polynomial import *
+def fit_spring_data(datafile):
+    data = np.loadtxt(datafile)
+    k = -polyfit(data[0],data[1],1)[1]
+    return k
+
+for name in names:
+    k = fit_spring_data('%s.txt'%name)
+    print k
+
+-->
+<h4 id="design-work-chronometer">Design Work: Chronometer</h4>
+<p>Hooke was not only a natural philosopher, but also a practical man, and he put his discovery to use (or possibly discovered it through!) designing high-accuracy chronometers—watch mechanisms. Hooke introduced the hairspring, a small loosely wound spiral spring which whips back and forth to very precisely control time. The hairspring's period is gently controlled by a balance wheel with a definite mass.</p>
+<!--Although early explorers voyaged long distances and eventually circumnavigated the globe, it wasn't until the late eighteenth century that the accurate and precise determination of longitude became possible.  Specifically, chronometers had to be constructed with both sufficient robustness to work under marine conditions (salt, humidity, shocks) and enough precision to enable the exact measurement of star positions using a sextant at a very specific time.  Eventually the Swiss turned their careful attention to the construction of these small clocks, introducing the “double roller Swiss anchor escapement” mechanism, which uses the hairspring, a small loosely wound spiral spring which whips back and forth to very precisely control time.  (This is why many watches claim Swiss precision in their sales literature.)-->
+<div class="figure">
+<img src="http://www.ablogtowatch.com/wp-content/uploads/2013/07/Breguet-balance-wheel.jpg" alt="" />
+
+</div>
+<blockquote>
+The [hairspring] has a single function: the spring reverses the direction of the balance at the end of its swing. As the balance swings counter-clockwise, it unwinds the spring; as the balance swings clockwise, it winds the spring. The tension produced in the spring (in either direction) reverses the travel of the balance. In performing this operation, the balance spring is responsible for the arc of the swing (amplitude) and thus for the entire timing and accuracy (i.e. consistency) of the movement.<sup><a href="http://people.timezone.com/library/horologium/horologium631673198118416858">OdetsND</a></sup>
+</blockquote>
+<p>If you are having trouble visualizing this process, take a look at this <a href="https://www.youtube.com/watch?v=5HepvsDDi4o">video of a hairspring</a> in operation.</p>
+<p>The hairspring–balance wheel system together constitute a <em>harmonic oscillator</em> and behave very regularly with a simple analytic motion. We may write</p>
+<p><br /><span class="math display">$$
+T = 2 \pi \sqrt{I/k}
+$$</span><br /></p>
+<p>where <span class="math inline"><em>T</em></span> is the period in seconds, <span class="math inline"><em>I</em></span> is the moment of inertia in <span class="math inline">lb ⋅ in<sup>2</sup></span>, and <span class="math inline"><em>k</em></span> is the spring constant in <span class="math inline">in ⋅ lb<sub>f</sub></span>. (We acknowledge a little obscurity on the conversion of units here—not including radians, that sort of thing, to keep it visually simple—but they work out.)</p>
+<p>The moment of inertia <span class="math inline"><em>I</em></span> of the balance wheel is simple to calculate: <br /><span class="math display"><em>I</em> = <em>m</em><em>r</em><sup>2</sup>.</span><br /> Assume that the balance wheel weighs <span class="math inline">1.87 × 10<sup> − 4</sup> lb</span> and has a radius of <span class="math inline">0.25 in</span>. You will use these equations and Python to recommend a design parameter for the material of a spring.</p>
+<p>For instance, if you have a spring with constant <span class="math inline"><em>k</em> = 1.6 × 10<sup> − 4</sup> in ⋅ lb<sub>f</sub></span> and a balance wheel with a moment of inertia <span class="math inline"><em>I</em> = (1/4 in)<sup>2</sup> ⋅ 2 × 10<sup> − 4</sup> lb = 1.25 × 10<sup> − 4</sup> lb ⋅ in<sup>2</sup></span>, then you should find the period of the hairspring to be <span class="math inline"><em>T</em> = 1.7 s</span>.</p>
+<p><em>It may be convenient to you to put this calculation of <span class="math inline"><em>T</em></span> into a function</em> as you will continue to reuse it, but we do not require it for the completion of this lab.</p>
+<ol start="7" style="list-style-type: decimal">
+<li><p>(5 pts) You have available to you a collection of springs and you are required to design a hairspring–balance wheel system which satisfies the design constraint that the system must oscillate at a frequency of four ticks per second (<em>i.e.</em>, four ticks per second, where a tick occurs at each extremum, so the time constant is <span class="math inline">0.5 s</span>). What are the material specifications for a suitable chronometer spring?</p>
+<p>Data for the springs available to you for the construction of the mechanism are available in the files:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">spring material</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">steel.txt</td>
+</tr>
+<tr class="even">
+<td align="left">copper.txt</td>
+</tr>
+<tr class="odd">
+<td align="left">brass.txt</td>
+</tr>
+<tr class="even">
+<td align="left">zinc.txt</td>
+</tr>
+</tbody>
+</table>
+<p>You should first calculate the (positive!) spring constant for each spring. You may then play around with various possible configurations (switching the spring or subtly altering the mass of the balance wheel, which should not exceed <span class="math inline">5 × 10<sup> − 4</sup> lb</span>) until your resulting period lies within 2% of <span class="math inline">0.5 s</span>—that is, within <span class="math inline">0.49 − 0.51 s</span>. (That's still a fair bit of drift, considering how many seconds there are in a day.)</p>
+<p>Your answer should be in the form <code>material, mass, time period</code>. For instance, if the brass spring with a weight of <span class="math inline">10<sup> − 5</sup>lb</span> attached had a time period of <span class="math inline"><em>T</em> = 0.42 s</span>, you would answer <code>brass, 1e-5, 0.42</code> (if this period were acceptable). You should only answer with two significant figures in either number, as the measurement precision of your manufacturing apparatus can't resolve smaller differences than that.</p></li>
+</ol>
+<!--
+(x,y)=np.loadtxt('brass.txt')
+k = -polyfit(x,y,1)[1]
+m = 1.4e-5
+r = 0.25
+I = m * r**2
+T = 2*np.pi*np.sqrt(I/k)
+-->
+<h3 id="a-bit-more-on-polynomials">A Bit More on Polynomials</h3>
+<p>Finally, what is the work required to displace the spring? The work <span class="math inline"><em>W</em></span> is defined as the force times the displacement, or in integral calculus form,</p>
+<p><br /><span class="math display"><em>W</em> = ∫ d<em>x</em><em>F</em>(<em>x</em>) = ∫ d<em>x</em>( − <em>k</em><em>x</em>).</span><br /></p>
+<p>Since the displacement is linear, the answer is actually rather trivial, but we can still use the <code>polyint</code> function to carry out the actual calculation for us. <code>polyint</code> is NumPy's way of integrating any polynomial; in our previous notation, to integrate the polynomial</p>
+<p><br /><span class="math display"><em>P</em>(<em>x</em>) = <em>a</em><sub><em>n</em></sub><em>x</em><sup><em>n</em></sup> + <em>a</em><sub><em>n</em> − 1</sub><em>x</em><sup><em>n</em> − 1</sup> +  ⋅  ⋅  ⋅  + <em>a</em><sub>2</sub><em>x</em><sup>2</sup> + <em>a</em><sub>1</sub><em>x</em><sup>1</sup> + <em>a</em><sub>0</sub></span><br /></p>
+<p>represented in Python as <code>P = [a_0, a_1, ..., a_nm1, a_n]</code> (again assuming that <code>a0</code> etc. have been defined), we would write</p>
+<pre><code>from numpy.polynomial.polynomial import *
+P_int = polyint(P)</code></pre>
+<p>(There is also a <code>polyder</code> which automatically differentiates a polynomial.)</p>
+<p>Let's make that more concrete by a complete example:</p>
+<pre><code>from numpy.polynomial.polynomial import *
+P = [-1, 0, 2, 4]
+P_int = polyint(P)
+
+x = np.linspace(0,4,5)
+P_fn = Polynomial(P)
+P_int_fn = Polynomial(P_int)    # polyint integrates the polynomial, but we
+                                # still have to evaluate the polynomial
+
+plt.plot(x,P_fn(x),&#39;g-&#39;,
+         x,P_int_fn(x),&#39;g--&#39;)
+plt.show()</code></pre>
+<ol start="8" style="list-style-type: decimal">
+<li><p>(2 pts) Consider a chronometer using a steel hairspring with a mass <span class="math inline"><em>m</em> = 0.0001 g</span> on the balance wheel of radius <span class="math inline">0.2 in</span>. Calculate the linear fit (<em>not</em> just the spring constant but the offset as well) and time period for this system first, then integrate the polynomial with the proper spring constant fit from <span class="math inline"><em>t</em> = 0 s</span> to <span class="math inline"><em>t</em> = <em>t</em><sub>period</sub></span>.</p>
+<pre><code>X =  np.linspace(0,T,11)
+Y = -np.polyfit( ... )    # &lt;-- your code here
+W =  polyint(Y)
+work = Polynomial(W)(X)</code></pre>
+<p>What is the work required to displace the spring for a single period? (This is the highest/last value in the array <code>work</code>.) Answer with a single <code>float</code>, <em>e.g.</em>, <code>0.000123456</code>.</p></li>
+</ol>
+<!-- A.M.D.G. -->
+</div>
+</body>
+</html>

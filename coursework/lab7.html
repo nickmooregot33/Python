@@ -1,0 +1,221 @@
+<!doctype html>
+<html>
+<head>
+
+<meta charset="utf-8" />
+<title>CS 101—Lab 7</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="./css/style.css">
+
+<!-- Loading mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+    <style>
+      #math_center { text-align:center; width:100%; background-color:yellow; }
+    </style>
+</head>
+<body>
+<div class="container" id="notebook-container">
+<h1 id="design-project-letter-frequencies-and-language-identification">Design Project: Letter Frequencies and Language Identification</h1>
+<p>For this project, you will work in pairs to produce a script.  In practice, this means that you and your partner will consult, and should occasionally trade off so that the time at the keyboard is roughly equal.</p>
+<ol start="1" style="list-style-type: decimal">
+<li>Report the NetID of your partner. You should both submit the script, and both of you should answer all of the numbered questions. You may submit identical files except for this line and the NetID at the top of your file.</li>
+</ol>
+<p>A random sampling of English text produces approximately the following frequency distribution:</p>
+<div class="figure">
+<img src="./img/freq-eng.png" width="100%;" />
+
+</div>
+<p>whereas Latin has the letter frequency distribution:</p>
+<div class="figure">
+<img src="./img/freq-lat.png" width="100%;" />
+
+</div>
+<p>and Welsh has the letter frequency distribution:</p>
+<div class="figure">
+<img src="./img/freq-cym.png" width="100%;" />
+
+</div>
+<p>Each language tends to have a unique &quot;fingerprint&quot; because of the relative frequency of letters and sounds. Such letter frequency information could be used, for instance, to determine how much type should be ordered for a letterpress. Today you will use it to assign rough probabilities to the likely language of a given text sample in an unknown language. (This is similar to what <a href="https://translate.google.com/">Google Translate</a> does when it auto-detects the language of a text sample, except that it uses whole words instead of letter frequencies to make its guess.)</p>
+<blockquote>
+<strong>Aside</strong>: We will restrict ourselves to the 26 letters of the basic Latin alphabet, disallowing diacritics ('naïve'→'naive'), accents ('recherche'→'recherche'), and nonbasic letters ('Skjærvø'→'Skjarvo'). (If you are a native speaker of another language, we sincerely apologize for this rank philistinism.)
+</blockquote>
+<p>This is the basic method you will use to assess the likelihood of a text sample being written in a given language:</p>
+<ol style="list-style-type: decimal">
+<li>Count the frequency of each letter in the text sample.</li>
+<li>Divide the resulting list of frequencies by the total number of letters. (That is, <em>normalize</em> the frequencies.)</li>
+<li>Determine the match between the normalized frequencies and a set of reference frequencies for each language to make a conjecture as to which language the text represents. (These aren't question numbers.)</li>
+</ol>
+<p>The last step is the most mathematically involved. We will define a frequency metric <span class="math"><em>f</em></span> to assess the goodness of the match between two sets of frequencies. In human language, you will calculate the difference between the two lists <span class="math"><em>L</em><sub>unknown</sub></span> and <span class="math"><em>L</em><sub>ref</sub></span>, which yields a third list of the differences. To make this list positive, take its absolute value. To provide a single value to compare, let <span class="math"><em>f</em></span> be equal to the sum of these absolute values. Thus a low value of <span class="math"><em>f</em></span> means a low difference and a better fit between the two frequency distributions than a high value of <span class="math"><em>f</em></span>. As an equation,</p>
+<div id="math_center;" ><span class="math"><em>f</em>(<em>L</em><sub>text</sub>, <em>L</em><sub>ref</sub>) = ∑<sub>letters</sub>|<em>L</em><sub>text</sub> − <em>L</em><sub>ref</sub>|.</span><br /></div>
+<p>Now let's write the code together to accomplish this.</p>
+<ul>
+<li><p>As with <code>lab6</code>, we have provided a file with scaffolding and comments for you to complete, <code>frequency.py</code>. This question will not be included in your answer file, but is included so that you understand the process you are composing.</p>
+<p>The first thing you need is the set of language letter frequencies you will compare to. You will first write a function <code>loadFreq</code> to load a given file. You will then use <code>loadFreq</code> with a list of file names to load all of the language frequencies you need. We provide a set of files (in <code>lab7/lang</code>) which define these frequencies for a collection of languages. (These frequencies are derived from the work of Stefan Trost<sup>[<a href="http://www.sttmedia.com/characterfrequencies">Trost2015</a>]</sup> and used with his permission.)</p>
+<p>Okay, starting with <code>loadFreq</code>. Take a look at the file format of <code>danish</code>:</p>
+<pre><code>A,8.27%
+B,1.42%
+C,0.45%
+...</code></pre>
+<p>If you wanted to read this into a dictionary, you could take each line and split it by the comma. You could try this out now:</p>
+<pre><code>testDict = {}
+testDict[&#39;A&#39;] = float(&#39;8.27%&#39;)</code></pre>
+<p>The problem is that Python doesn't know if the percent sign in the string is supposed to be a string format marker or actually a percent sign, so it doesn't correctly parse this string into a <code>float</code>. In order to convert a string of a percent value into a float, you should compose a function <code>p2f(value)</code> (short for <code>percentToFloat</code>) which <code>strip</code>s the percent sign off of the string <code>value</code>, converts this to a <code>float</code>, and then divides by 100 and <code>return</code>s the result. (Python provides a function <code>round</code> which you may elect to use here to simplify the result, but this is not required.)</p>
+<p>Now try to add to the dictionary:</p>
+<pre><code>testDict = {}
+testDict[&#39;A&#39;] = p2f(&#39;8.27%&#39;)</code></pre>
+<p>Okay, next you need to write a loop to read data from a file and add the data as dictionary entries. Try this for a start:</p>
+<pre><code>letters = {}
+with open(&#39;lang/danish&#39;, &#39;r&#39;) as langFile:
+    for line in langFile.readlines():
+        # Split each line at the comma and add the second part (value)
+        # to the dictionary with the first part (letter) as key.
+        # Make sure to strip off whitespace as well as to convert the
+        # value to a float first.
+        pass</code></pre>
+<p>After your loop is complete, <code>letters</code> should contain a dictionary with keys <code>'A'</code> through <code>'Z'</code> and their corresponding frequency values.</p>
+<p>This question will not be included in your answer file, and you probably do not wish to retain the foregoing code directly in your script file <code>frequency.py</code>, so please copy it into a new empty text file in Gedit for reference. In the next question, you will convert this code into a function.</p></li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li><p>Once you have the foregoing process working, convert it into a function <code>loadFreq</code> which accepts <code>language</code> and <code>return</code>s the dictionary <code>letters</code>. (This could be done by simply replacing <code>danish</code> in the string above with a string format replacement <code>%s</code> and then <code>%language</code> after the string.) This question will be answered <code>frequency.py:loadFreq</code> verbatim.</p></li>
+<li><p><em>Next</em>, you need to write a function <code>loadLanguages</code> which will take a list of languages and create a dictionary for each. Then all of these dictionaries should be added to <code>L</code>, the overall dictionary, by language. That is, it will look something like this:</p>
+<pre><code>L is a dictionary with keys:
+    Afrikaans -&gt; (a dictionary with keys:
+                        letter -&gt; frequency)
+    Catalan   -&gt; (a dictionary with keys:
+                        letter -&gt; frequency)
+    Danish    -&gt; (a dictionary with keys:
+                        letter -&gt; frequency)</code></pre>
+<p>We provide a set of files (in <code>lab7/lang</code>) which define these frequencies for a collection of languages. (These values are derived from the work of Stefan Trost<sup>[<a href="http://www.sttmedia.com/characterfrequencies">Trost2015</a>]</sup> and used with his permission.)</p>
+<p>We need to get a list of these files and then open each of them, reading them into a dictionary. While we could just list these out and do it manually, that's a little clunky and hard to fix if we add more languages later (or if one is missing). Thus we will instruct Python to ask which files are available to us in the directory using the handy <code>listdir</code> function<sup>[<a href="https://docs.python.org/2/library/os.html#os.listdir">docs</a>]</sup>.</p>
+<pre><code>from os import listdir
+languageNames = listdir(&#39;lang&#39;)
+print languageNames</code></pre>
+<p>Now we can write a <code>for</code> loop over the list <code>languageNames</code>, and for each language we can 1) create a dictionary using <code>loadFreq</code> and 2) add this dictionary to the master dictionary <code>L</code> with the language as the key. Do this in the function <code>loadLanguages</code> (which need have no parameters) and <code>return</code> <code>L</code>.</p>
+<p>This question will be answered <code>frequency.py:loadLanguages</code> verbatim. You can then use this function as</p>
+<pre><code>L = loadLanguages() # load languages from all available files
+print L.keys()      # verify that languages have been loaded</code></pre></li>
+<li><p>Once those two functions are working properly (which can be easily verified by checking the original files you are loading data from), we need to write a function <code>calcFreq</code> which accepts as a parameter a block of text (as a string <code>text</code>) and returns a dictionary containing the normalized frequency by letter. This question will be answered <code>frequency.py:calcFreq</code> verbatim.</p>
+<p>In order to calculate letter frequencies, you need a list of letters and the string in all upper-case letters. To avoid confusion, we will rename this built-in string <code>ascii_uppercase</code> as <code>alphabet</code> when we <code>import</code> it.</p>
+<pre><code>from string import ascii_uppercase as alphabet
+print alphabet
+text = text.upper()
+print text</code></pre>
+<p>(You don't need to keep the <code>print</code> statements in your final script but they're useful to clarify what's going on.)</p>
+<p>Now create an empty frequency dictionary <code>letterFreq</code>. Loop over each letter of the <code>alphabet</code> and <code>count</code> the number of times each letter occurs in <code>text</code>. Add this count to <code>letterFreq</code>.</p>
+<p>The final step before <code>return</code>ing the letter frequencies is to normalize the values. To do this, you need to calculate the total number of letters in <code>text</code> (letters, NOT whitespace or punctuation). Since this is a bit involved, the following lines of code will give you a copy of <code>text</code> without whitespace or punctuation:</p>
+<pre><code>from string import whitespace, punctuation
+print whitespace, punctuation
+for character in whitespace+punctuation:
+    text = text.replace(character, &#39;&#39;)</code></pre>
+<p>Now set each frequency value in the dictionary to its normalized value. (Be careful of integer division though!)</p>
+<p>Finally, <code>calcFreq</code> should <code>return</code> the dictionary of normalized letter frequencies.</p>
+<p>A set of easy checks on your code for each step above is:</p>
+<ol style="list-style-type: decimal">
+<li><p>Check by making sure that the sum of the letter frequencies is the same as the total number of letters in the text.</p></li>
+<li><p>Check by making sure that the sum of the normalized list elements is 1.0. (Due to rounding errors, this is <em>not</em> true of the reference frequency lists, but we won't worry about that marginal error there.)</p></li>
+</ol></li>
+<li><p>Finally, you will compose a function <code>calcMatch</code> to measure the closeness of the match between a text and a reference language letter distribution. This question will be answered <code>frequency.py:calcMatch</code>.</p>
+<p>Recall that the function we are calculating, <span class="math"><em>f</em></span>, is a metric for how <em>different</em> two letter frequency distributions are.</p>
+<p>The difference between two lists <span class="math"><em>L</em><sub>unknown</sub></span> and <span class="math"><em>L</em><sub>ref</sub></span> yields a third list of the differences. To make this list positive, take its absolute value. To provide a single value to compare, let <span class="math"><em>f</em></span> be equal to the sum of these absolute values. Thus a low value of <span class="math"><em>f</em></span> means a low difference and a better fit between the two frequency distributions than a high value of <span class="math"><em>f</em></span>. As an equation,</p>
+<div id="math_center;" ><span class="math"><em>f</em>(<em>L</em><sub>text</sub>, <em>L</em><sub>ref</sub>) = ∑<sub>letters</sub>|<em>L</em><sub>text</sub> − <em>L</em><sub>ref</sub>|.</span><br /></div>
+<p>In <code>calcMatch</code>, you will implement this definition of <span class="math"><em>f</em></span>. First, write a code block which loops through each key of two dictionaries <code>L_text</code> and <code>L_ref</code> and calculates their absolute difference in a third dictionary <code>L_diff</code>.</p>
+<p>Next, loop through <code>L_diff</code> and sum all values together in a variable <code>L_sum</code>. Then <code>return</code> <code>L_sum</code>. That's it!</p>
+<p>An easy check on this is to verify that a frequency list compared with itself has <span class="math"><em>f</em> = 0</span>—that is, no difference. The correlation between English and Finnish is <code>calcMatch(L['english'], L['finnish']) == 0.5338</code>.</p></li>
+</ol>
+<p>Utilize your script to answer the following questions. <strong>For ease in grading</strong>, please answer them in the format <code>language, f-value</code>; that is,</p>
+<pre><code>german, 0.355950369588</code></pre>
+<p>is an acceptable response. The simplest workflow is to use a loop:</p>
+<ul>
+<li>Set the text sample to <code>text</code>.</li>
+<li><p>Loop over each language:</p>
+<pre><code>text = ...
+for language in L.keys():
+    freq = calcFreq(text)
+    f = calcMatch(freq, L[language])
+    print &#39;%s, %s&#39;%(language, f)</code></pre></li>
+</ul>
+<p>(Please don't waste time typing this block out every time—you can either copy and paste it into the interpreter or you can use the up arrow key to cycle back through previous commands and enter them in order.)</p>
+<p>Consider the text</p>
+<pre><code>&#39;&#39;&#39;Soren Kierkegaard (&quot;Frygt og baven:  Dialektisk lyrik&quot;, 1843)
+Er det virkelig saa, er al den Spidsborgerlighed, jeg seer i Livet, som jeg ikke lader mit Ord men min Gjerning domme, er den virkelig ikke hvad den synes, er den Vidunderet? Det lod sig jo tanke; thi hiin Troens Helt havde jo en paafaldende Lighed dermed; thi hiin Troens Helt var end ikke Ironiker og Humorist, men noget endnu Hoiere. Der tales i vor Tid meget om Ironi og Humor, Lsar af Folk, som aldrig have formaaet at praktisere deri, men som desuagtet vide at forklare Alt. Jeg er ikke ganske ubekjendt med disse tvende Lidenskaber, jeg veed lidt mere om dem end hvad der staaer i tydske og tydsk-danske Compendier. Jeg veed derfor, at disse tvende Lidenskaber ere vasentlig forskjellige fra Troens Lidenskab. Ironi og Humor reflektere ogsaa paa sig selv og hore derfor hjemme i den uendelige Resignations Sphare, de have deres Elasticitet i, at Individet er incommensurabelt for Virkeligheden.
+&#39;&#39;&#39;</code></pre>
+<ol start="6" style="list-style-type: decimal">
+<li>Which language is the best match, and what is its value of <span class="math"><em>f</em></span>?</li>
+<li>Which is the worst, and its <span class="math"><em>f</em></span>?</li>
+</ol>
+<p>Consider the text</p>
+<pre><code>&#39;&#39;&#39;
+Below the thunders of the upper deep;
+Far, far beneath in the abysmal sea, 
+His ancient, dreamless, uninvaded sleep
+The Kraken sleepeth: faintest sunlights flee
+About his shadowy sides: above him swell
+Huge sponges of millennial growth and height; 
+And far away into the sickly light, 
+From many a wondrous grot and secret cell
+Unnumbered and enormous polypi
+Winnow with giant arms the slumbering green.
+There hath he lain for ages and will lie
+Battening upon huge sea-worms in his sleep,
+Until the latter fire shall heat the deep;
+Then once by man and angels to be seen,
+In roaring he shall rise and on the surface die.
+(Alfred Lord Tennyson)
+&#39;&#39;&#39;</code></pre>
+<ol start="8" style="list-style-type: decimal">
+<li>Which language is the best match, and what is its value of <span class="math"><em>f</em></span>?</li>
+<li>Which is the worst, and its <span class="math"><em>f</em></span>?</li>
+</ol>
+<p>Consider the text</p>
+<pre><code>&#39;&#39;&#39;Onder hierdie hoof wil ek u kortliks op grondige teestelling wys en ook op verbinding. Die satiere, immers, is algemeen opgevat as spottende uiting van tenminste ontevredenheid of misnoee ten opsigte van slegtheid en dwaasheid, bestaande wantoestande in die werklikheid, met die doel om daarteen gedagte, wil en gevoel op te wek. Hierby wil ek vooropstel die verskillende grade ven gevoel in satieriese spot, varierende tussen die uiterstes van hoon en sarkasme aan die een kant en gemoedelikheid van komiek en mildheid van humor aan die ander. &#39;n Definiesie van satiere wat enkel op hoon en bitterheid wys, skyn my egter nie ruim genoeg vir hierdie begrip nie. Hierteen kan miskien ingebring word dat ons dan die satiere nie langer in sy essensieelste vorm kry nie.  (F.E.J. Malherbe, Humor in die algemeen en sy uiting in die Afrikaanse letterkunde)
+&#39;&#39;&#39;</code></pre>
+<ol start="10" style="list-style-type: decimal">
+<li>Which language is the best match, and what is its value of <span class="math"><em>f</em></span>?</li>
+<li>Which is the worst, and its <span class="math"><em>f</em></span>?</li>
+</ol>
+<p>Consider the text</p>
+<pre><code>&#39;&#39;&#39;Tots els essers humans neixen lliures i iguals en dignitat i en drets. Son dotats de rao i de consciencia, i han de comportar-se fraternalment els uns amb els altres.
+&#39;&#39;&#39;</code></pre>
+<ol start="12" style="list-style-type: decimal">
+<li>Which language is the best match, and what is its value of <span class="math"><em>f</em></span>?</li>
+<li>Which is the worst, and its <span class="math"><em>f</em></span>?</li>
+</ol>
+<p>(You will note that, unsurprisingly, short text samples are harder to statistically analyze in this manner. The foregoing sample is written in Catalan, but this method detects a slightly different language.)</p>
+<p>Consider the text</p>
+<pre><code>&#39;&#39;&#39;Quoi que puisse dire Aristote, et toute la philosophie, il n&#39;est rien d&#39;egal au tabac ; c&#39;est la passion des honnetes gens ; et qui vit sans tabac n&#39;est pas digne de vivre. Non seulement il rejouit et purge les cerveaux humains, mais encore il instruit les ames a la vertu, et l&#39;on apprend avec lui a devenir honnete homme. Ne voyez-vous pas bien, des qu&#39;on en prend, de quelle maniere obligeante on en use avec tout le monde, et comme on est ravi d&#39;en donner a droite et a gauche, partout ou l&#39;on se trouve ? On n&#39;attend pas meme qu&#39;on en demande, et l&#39;on court au-devant du souhait des gens ; tant il est vrai que le tabac inspire des sentiments d&#39;honneur et de vertu a tous ceux qui en prennent. Mais c&#39;est assez de cette matiere, reprenons un peu notre discours. Si bien donc, cher Gusman, que done Elvire, ta maitresse, surprise de notre depart, s&#39;est mise en campagne apres nous ; et son coeur, que mon Maitre a su toucher trop fortement, n&#39;a pu vivre, dis-tu, sans le venir chercher ici. Veux-tu qu&#39;entre-nous je te dise ma pensee ? J&#39;ai peur qu&#39;elle ne soit mal payee de son amour, que son voyage en cette ville produise peu de fruit, et que vous eussiez autant gagne a ne bouger de la.
+(Moliere, Don Juan ou le Festin de pierre)
+&#39;&#39;&#39;</code></pre>
+<ol start="14" style="list-style-type: decimal">
+<li>Which language is the best match, and what is its value of <span class="math"><em>f</em></span>?</li>
+<li><p>Which is the worst, and its <span class="math"><em>f</em></span>?</p></li>
+<li><p>As we are halfway through the semester, we would like some feedback on the performance of your lab section's teaching assistant. Please fill out <a href="https://illinois.edu/fb/sec/2463636">this survey</a> (which should only take a couple of minutes) to let us know how your lab section's operation is going. (Just answer <code>done</code> for this question.)</p></li>
+</ol>
+<!-- A.M.D.G. -->
+</div>
+</body>
+</html>

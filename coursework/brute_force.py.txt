@@ -1,0 +1,48 @@
+import itertools,random
+import numpy as np
+
+def f(x,w,v):
+	total_weight=0
+	total_value=0
+	for i in x:
+		total_weight+=w[i]
+		total_value+=v[i]
+	if total_weight>=50:
+		return 0
+	else:
+		return total_value
+
+np.random.seed(10)
+n=18
+items=range(n)
+weights=np.random.rand(n)*50
+values=np.random.rand(n)*100
+print weights
+print values
+
+best_items=None
+best_value=0.0
+for i in range(n):
+	for x in itertools.combinations(items,i):
+		v=f(x,weights,values)
+		if v>best_value:
+			best_value=v
+			best_items=x
+print ""
+print "Brute force search:"
+print best_items
+print best_value
+
+samples=100000
+best_items=None
+best_value=0.0
+for i in range(samples):
+	bool(random.getrandbits(1))
+	x=[j for j in xrange(n) if random.getrandbits(1)]
+	v=f(x,weights,values)
+	if v>best_value:
+		best_value=v
+		best_items=x
+print "Random sample:"
+print best_items
+print best_value

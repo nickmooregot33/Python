@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+<head>
+
+<meta charset="utf-8" />
+<title>CS 101—Lab 9</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<!-- Custom stylesheet, it must be in the same directory as the html file -->
+<link rel="stylesheet" href="./css/style.css">
+
+<!-- Loading mathjax macro -->
+<!-- Load mathjax -->
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <!-- MathJax configuration -->
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    <!-- End of mathjax configuration -->
+
+    <style>
+      #math_center { text-align:center; width:100%; background-color:yellow; }
+    </style>
+</head>
+<body>
+<div class="container" id="notebook-container">
+<h2 id="modeling-fluids">Modeling Fluids</h2>
+<p>In the physical description of liquids and gases, it often becomes necessary to use a relationship between the pressure on a volume of fluid and its temperature. The simplest of these relationships is the <em>ideal gas law</em>,</p>
+<p><br /><span class="math"><em>P</em><em>V</em> = <em>R</em><em>T</em></span><br /></p>
+<p>(for a specified number of molecules of the gas).</p>
+<p>The ideal gas law describes gases very well near atmospheric conditions and at lower pressures, but deviates from the true behavior of gases under other circumstances. Since accurate descriptions of fluid flow, chemical reactivity, and oil field dynamics (among other things) depend on describing the state of a liquid, corrections are required.</p>
+<p>The true behavior of gases is extremely complex, but several equations have been introduced to model the gas characteristics approximately. Among these so-called <em>equations of state</em> are the van der Waals equation of state<sup>[<a href="https://en.wikipedia.org/wiki/Equation_of_state#Van_der_Waals_equation_of_state">Wikipedia</a>]</sup>,</p>
+<p><br /><span class="math">$$
+\begin{align*}
+P_{\text{vdW}} &amp; = \frac{RT}{V-b} - \frac{a}{V^2} \\
+\end{align*}
+$$</span><br /></p>
+<p>and the Redlich–Kwong equation of state<sup>[<a href="http://physwiki.ucdavis.edu/Condensed_Matter/Equations_of_state/Redlich-Kwong_equation_of_state">PhysicsWiki</a>]</sup>,</p>
+<p><br /><span class="math">$$
+\begin{align}
+P_{\text{RK}} &amp; = \frac{RT}{V-b} - \frac{a}{\sqrt{T}V(V+b)} \text{.} \\
+\end{align}
+$$</span><br /></p>
+<p>(Constants <span class="math"><em>a</em></span> and <span class="math"><em>b</em></span> are specific to the gas being modeled: that is, argon has a certain <span class="math"><em>a</em><sub>Ar</sub></span>, <span class="math"><em>b</em><sub>Ar</sub></span>; oxygen has a certain <span class="math"><em>a</em><sub>O<sub>2</sub></sub></span>, <span class="math"><em>b</em><sub>O<sub>2</sub></sub></span>, and so forth. These typically use constants from the specific fluid known as the <em>critical temperature</em> <span class="math"><em>T</em><sub><em>c</em></sub></span>, <em>critical pressure</em> <span class="math"><em>P</em><sub><em>c</em></sub></span>, and <em>critical volume</em> <span class="math"><em>V</em><sub><em>c</em></sub></span>. The calculation of these constants is provided for you in the associated file <code>fluid.py</code> already, so you need not worry about them.)</p>
+<p>In today's lab, you first will implement all three gas laws as functions and provide dictionaries of their characteristic constants for several gases. You will then use these data to compare their results with real data and assess the relative accuracy of the various models.</p>
+<ol start="1" style="list-style-type: decimal">
+<li><p>Write the ideal gas law as a function <code>P_ig</code> which accepts parameters <code>V</code> in cubic meters and <code>T</code> in degrees Kelvin (absolute temperature) and returns the corresponding <code>P</code>ressure in pascals. <span class="math"><em>R</em> = 8.314 joule ⋅ K</span>, a proportionality constant. (You may refer back to <code>lab3</code> if you like.) Answer this question with <code>fluid.py:P_ig</code>.</p>
+<p>You may test your function against the following values:</p>
+<table style="width:50%">
+<thead>
+<tr class="header">
+<th align="left"><span class="math"><em>P</em></span>/Pa</th>
+<th align="left"><span class="math"><em>V</em></span>/m<span class="math"><em></em><sup>3</sup></span></th>
+<th align="left"><span class="math"><em>T</em></span>/K</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">83140</td>
+<td align="left">0.01</td>
+<td align="left">100</td>
+</tr>
+<tr class="even">
+<td align="left">166280</td>
+<td align="left">0.01</td>
+<td align="left">200</td>
+</tr>
+</tbody>
+</table></li>
+<li><p>Write the van der Waals equation of state as a function <code>P_vdw</code> which accepts parameters <code>V</code>, <code>T</code>, <code>T_c</code>, and <code>P_c</code>, and returns the corresponding <code>P</code>ressure. Answer this question with <code>fluid.py:P_vdw</code>. Please be careful with proper capitalization.</p>
+<p>You may test your function against the following values:</p>
+<table style="width:75%">
+<thead>
+<tr class="header">
+<th align="left"><span class="math"><em>P</em></span></th>
+<th align="left"><span class="math"><em>V</em></span></th>
+<th align="left"><span class="math"><em>T</em></span></th>
+<th align="left"><span class="math"><em>T</em><sub><em>c</em></sub></span></th>
+<th align="left"><span class="math"><em>P</em><sub><em>c</em></sub></span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">40057.7</td>
+<td align="left">0.056634</td>
+<td align="left">273.15</td>
+<td align="left">190.6</td>
+<td align="left">4599000</td>
+</tr>
+<tr class="even">
+<td align="left">47403.4</td>
+<td align="left">0.056634</td>
+<td align="left">323.15</td>
+<td align="left">190.6</td>
+<td align="left">4599000</td>
+</tr>
+</tbody>
+</table></li>
+<li><p>Write the Redlich–Kwong equation of state as a function <code>P_rk</code> which accepts parameters <code>V</code>, <code>T</code>, <code>T_c</code>, and <code>P_c</code>, and returns the corresponding <code>P</code>ressure. You should use the <code>**0.5</code> notation for the square root or <code>import</code> <code>sqrt</code> from <code>numpy</code> (not from <code>math</code>). Answer this question with <code>fluid.py:P_rk</code>. Please be careful with proper capitalization.</p>
+<p>You may test your function against the following values:</p>
+<table style="width:75%">
+<thead>
+<tr class="header">
+<th align="left"><span class="math"><em>P</em></span></th>
+<th align="left"><span class="math"><em>V</em></span></th>
+<th align="left"><span class="math"><em>T</em></span></th>
+<th align="left"><span class="math"><em>T</em><sub><em>c</em></sub></span></th>
+<th align="left"><span class="math"><em>P</em><sub><em>c</em></sub></span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">40059.4</td>
+<td align="left">0.056634</td>
+<td align="left">273.15</td>
+<td align="left">190.6</td>
+<td align="left">4599000</td>
+</tr>
+<tr class="even">
+<td align="left">47408.3</td>
+<td align="left">0.056634</td>
+<td align="left">323.15</td>
+<td align="left">190.6</td>
+<td align="left">4599000</td>
+</tr>
+</tbody>
+</table></li>
+</ol>
+<p>As you can see, there are subtle variations between these equations of state even at fairly low temperature and pressure.</p>
+<ol start="4" style="list-style-type: decimal">
+<li><p>Examine the provided function called <code>getData</code> which returns a dictionary based on the following table. The key is the gas abbreviation in the left-most column, and the dictionary should return a tuple of <span class="math"><em>T</em><sub><em>c</em></sub></span>, <span class="math"><em>P</em><sub><em>c</em></sub></span>. You should add two new gases to this dictionary, <code>'air'</code> at <code>(132.2,3745000)</code> and <code>'H2O'</code> at <code>(647.1,22055000)</code>. Answer this question with <code>fluid.py:getData</code>. We will assume below that you have stored the result of calling the completed function in a variable <code>gasdata</code>.</p>
+<table style="width:30%">
+<thead>
+<tr class="header">
+<th align="left">Gas</th>
+<th align="left"><span class="math"><em>T</em><sub><em>c</em></sub></span></th>
+<th align="left"><span class="math"><em>P</em><sub><em>c</em></sub></span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>H2</code></td>
+<td align="left">33.19</td>
+<td align="left">1313000</td>
+</tr>
+<tr class="even">
+<td align="left"><code>O2</code></td>
+<td align="left">154.6</td>
+<td align="left">5043000</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>N2</code></td>
+<td align="left">126.2</td>
+<td align="left">3400000</td>
+</tr>
+<tr class="even">
+<td align="left"><code>CO2</code></td>
+<td align="left">304.2</td>
+<td align="left">7383000</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>Ar</code></td>
+<td align="left">150.9</td>
+<td align="left">4894000</td>
+</tr>
+</tbody>
+</table>
+<p>This should be the result of calling your code up to this point:</p>
+<pre><code>P_rk(0.01, 373.15, gasdata[&#39;H2&#39;][0], gasdata[&#39;H2&#39;][1])
+310728.9000971877</code></pre></li>
+</ol>
+<p>Now that we have some models of gas behavior written, we can test predictions and make recommendations on the basis of the several equations of state.</p>
+<p>For ease-of-use, we will use NumPy arrays to store our data values. (This allows us to perform <em>array operations</em>, that is, to multiply all elements in an array by a single value at the same time.)</p>
+<ol start="5" style="list-style-type: decimal">
+<li><p>One potential reason to use equations of state is to assess the storage pressure in gas cylinders at various temperatures, thus allowing safety officials to set guidelines. A representative cylinder can hold 44 liters, or <span class="math">0.044 m<sup>3</sup></span> (use this latter value).</p>
+<p>In order to test the pressure across a range of temperatures, you should create an array of temperature points</p>
+<pre><code>temps    = np.array((273.15,  298.15,  323.15,  348.15,  373.15,  398.15))</code></pre>
+<p>and then store the results for pressure for each data point in an appropriate array variable. For instance, for the Redlich–Kwong equation of state, the results could be calculate as</p>
+<pre><code>volume = 0.044 # m**3
+Pcyl_rk = P_rk(volume, temps, gasdata[&#39;O2&#39;][0], gasdata[&#39;O2&#39;][1])</code></pre>
+<p>Plot these data, save the plot as <code>figure_5.png</code>, and answer this question with that file name.</p></li>
+<li><p>At the right-most data point (temperature <span class="math">398.15 K</span>), what is the percent difference between the ideal-gas law and Redlich–Kwong, using <span class="math"><em>P</em><sub>rk</sub></span> as the standard? (This value should be positive, which is why you should use the <code>abs</code>olute value function.)</p>
+<p><br /><span class="math">$$\%_\text{error} = \left|\frac{P_\text{rk} - P_\text{IG}}{P_\text{rk}}\right| \times 100$$</span><br /></p>
+<p>Your answer should be simply <code>0.0012345</code> in form, without a percent sign.</p></li>
+<li><p>Drop the volume by 90% to <code>0.0044</code> and calculate pressures at the same temperatures as above. Now what is the percent difference between the ideal-gas law and Redlich–Kwong?</p></li>
+</ol>
+<p>Argon is considered to behave very closely to an ideal gas because it is a spherical one-atom molecule.</p>
+<ol start="8" style="list-style-type: decimal">
+<li><p>Consider the pressure of argon in a small gas cylinder:</p>
+<pre><code>volume = 0.044 # m**3
+Pcyl_ig  = P_ig(volume, temps)
+Pcyl_rk = P_rk(volume, temps, gasdata[&#39;Ar&#39;][0], gasdata[&#39;Ar&#39;][1])
+
+plt.plot(temps, Pcyl_ig,  &#39;g-&#39;,
+         temps, Pcyl_rk, &#39;r-&#39;)
+plt.show()</code></pre>
+<p>Argon's modeled behavior with the Redlich–Kwong equation is quite similar to an ideal gas. Plot these data, save the plot as <code>figure_8.png</code>, and answer this question with that file name.</p></li>
+<li><p>At the right-most data point (temperature <span class="math">398.15 K</span>), what is the percent difference between the ideal-gas law and Redlich–Kwong for argon, using <span class="math"><em>P</em><sub>rk</sub></span> as the standard? <!--0.0075910756967857941--></p></li>
+</ol>
+<p>In contrast, butane is shaped like a Y and tends to behave very non-ideally. It is a gas at room temperature and standard atmospheric pressure, but even in a tiny thin-shelled plastic lighter it is a liquid. While we won't quantify the liquid–gas transition directly (which is a pretty involved calculation), we will see how far from ideality butane is.</p>
+<ol start="10" style="list-style-type: decimal">
+<li><p>Add a line for butane, <code>'butane'</code> to the <code>getData</code> function in <code>fluid.py</code>. The critical temperature and pressure are 408.1 K and 3648000 Pa. Now consider the pressure of butane in a small gas cylinder:</p>
+<pre><code>volume = 0.044 # m**3
+Pcyl_ig  = P_ig(volume, temps)
+Pcyl_rk = P_rk(volume, temps, gasdata[&#39;butane&#39;][0], gasdata[&#39;butane&#39;][1])
+
+plt.plot(temps, Pcyl_ig,  &#39;g-&#39;,
+         temps, Pcyl_rk, &#39;r-&#39;)
+plt.show()</code></pre>
+<p>Compared to argon or even oxygen, butane is pretty far away from ideality (the green line). Plot these data, save the plot as <code>figure_10.png</code>, and answer this question with that file name.</p></li>
+<li><p>At the right-most data point (temperature <span class="math">398.15 K</span>), what is the percent difference between the ideal-gas law and Redlich–Kwong for butane, using <span class="math"><em>P</em><sub>rk</sub></span> as the standard? This is about 100 times worse of a match than argon to ideality. <!--0.75825882130541766--></p></li>
+<li><p>Prior predictions were quite close to each other, within a few percent. But for other cases they diverge dangerously (if one relies on the less-accurate equation). Consider an amount of CO<sub>2</sub> gas compressed into the small volume of 0.000667 m<sup>3</sup> at a temperature of <span class="math">248.15 K</span> (<span class="math"> − 25 <sup> ∘ </sup>C</span>). What is the pressure according to <code>P_ig</code>?</p></li>
+<li><p>What is the pressure according to <code>P_vdw</code>?</p></li>
+<li><p>What is the pressure according to <code>P_rk</code>?</p></li>
+<li><p>Plot all three equations of state across the temperature range</p>
+<pre><code>temps = np.linspace(100,500,101)</code></pre>
+<p>Save this figure, and answer the question with the figure name as customary.</p></li>
+</ol>
+<p>Clearly, at low temperatures and high pressures the laws start to break down.</p>
+<ol start="16" style="list-style-type: decimal">
+<li><p>Let's go even more extreme: take a volume of 10% of that, or <code>0.0000667</code>. (At this absurdly small volume, one can expect very high pressures to be necessary to contain the fluid, and our results become unphysical at some point.) Plot the range of the prior question, save the figure, and answer this question accordingly.</p></li>
+<li><p>At <span class="math"><em>T</em> = 500 K</span>, what is the percent difference between the ideal-gas law and Redlich–Kwong, using <span class="math"><em>P</em><sub>rk</sub></span> as the standard? (This value should be positive.)</p></li>
+<li><p>At <span class="math"><em>T</em> = 500 K</span>, what is the percent difference between the van der Waals law and Redlich–Kwong, using <span class="math"><em>P</em><sub>rk</sub></span> as the standard? (This value should be positive.)</p></li>
+</ol>
+<p>Equations of state find broad application, but it's clear that you as an engineer need to understand the differences between them, the ranges of applicability, and the risks of under- or overestimating the pressure–temperature relationship.</p>
+<!-- A.M.D.G. -->
+</div>
+</body>
+</html>
